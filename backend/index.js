@@ -37,6 +37,10 @@ const generateOTP = () => {
   return crypto.randomInt(100000, 999999).toString();
 };
 
+
+app.get("/",(req,res)=>{
+  res.send("backend started")
+})
 // Send OTP Route
 app.post("/send-otp", async (req, res) => {
   const { collegeId } = req.body;
