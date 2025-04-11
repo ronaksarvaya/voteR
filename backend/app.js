@@ -248,9 +248,10 @@ app.get("/admin/votes", async (req, res) => {
 const PORT = process.env.PORT || 5000;
 connectToDB()
   .then(() => {
-    app.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`);
-    });
+    // app.listen(PORT, () => {
+    //   console.log(`Server running on port ${PORT}`);
+    // });
+     console.log(`success vercel`);
   })
   .catch((err) => {
     console.error("Failed to connect to DB", err);
