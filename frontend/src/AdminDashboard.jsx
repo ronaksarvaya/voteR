@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import {jwtDecode} from "jwt-decode";
-
+const API_URL = process.env.REACT_APP_API_URL;
 
 const AdminDashboard = () => {
 
@@ -36,9 +36,9 @@ const AdminDashboard = () => {
 
   const fetchData = async () => {
     try {
-      const resStudents = await fetch("http://localhost:5000/admin/students");
-      const resVotes = await fetch("http://localhost:5000/admin/votes");
-      const resPending = await fetch("http://localhost:5000/admin/pending-candidates");
+      const resStudents = await fetch(`${API_URL}/admin/students`);
+      const resVotes = await fetch(`${API_URL}/admin/votes`);
+      const resPending = await fetch(`${API_URL}/admin/pending-candidates`);
 
       const dataStudents = await resStudents.json();
       const dataVotes = await resVotes.json();
@@ -54,7 +54,7 @@ const AdminDashboard = () => {
 
   const handleApprove = async (collegeId) => {
     try {
-      const res = await fetch("http://localhost:5000/admin/approve-candidate", {
+      const res = await fetch(`${API_URL}/admin/approve-candidate`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ collegeId })

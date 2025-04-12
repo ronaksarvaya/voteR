@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom"; // ✅ Import here
-
+const API_URL = process.env.REACT_APP_API_URL;
 
 const Login = () => {
   const [collegeId, setCollegeId] = useState("");
@@ -14,7 +14,7 @@ const Login = () => {
 
     if (collegeId === "admin_ronak" || collegeId === "user_ronak") {
       try {
-        const res = await fetch("http://localhost:5000/direct-login", {
+        const res = await fetch(`${API_URL}/direct-login`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json"
@@ -55,7 +55,7 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const response = await fetch("http://localhost:5000/otp/send-otp", {
+      const response = await fetch(`${API_URL}/otp/send-otp`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
