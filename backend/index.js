@@ -231,20 +231,6 @@ app.get("/admin/votes", async (req, res) => {
 
 // Admin Dashboard Route ends
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 const PORT = process.env.PORT || 5000;
 connectToDB()
   .then(() => {
