@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import {jwtDecode} from "jwt-decode";
-import { API_URL } from "../config";
+import { API_URL } from "/config";
 
 console.log(API_URL);
 
