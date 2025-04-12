@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import {jwtDecode} from "jwt-decode";
-const API_URL = process.env.REACT_APP_API_URL;
+import { API_URL } from "../config";
+
+console.log(API_URL);
 
 const AdminDashboard = () => {
 

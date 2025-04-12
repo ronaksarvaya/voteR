@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-const API_URL = process.env.REACT_APP_API_URL;
+import { API_URL } from "../config";
+
 
 const Verify = () => {
   const [otp, setOtp] = useState("");
