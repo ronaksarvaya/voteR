@@ -1,17 +1,26 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
-const Verify = ({ collegeId }) => {
+const Verify = () => {
   const [otp, setOtp] = useState("");
   const [error, setError] = useState("");
   const [verified, setVerified] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+  const collegeId = location.state?.collegeId;
+
+  // Redirect if collegeId is not available
+  useEffect(() => {
+    if (!collegeId) {
+      navigate("/login");
+    }
+  }, [collegeId, navigate]);
 
   const handleVerifyOTP = async (e) => {
     e.preventDefault();
 
     try {
-      const response = await fetch("http://localhost:5000/verify-otp", {
+      const response = await fetch("http://localhost:5000/otp/verify-otp", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -37,7 +46,7 @@ const Verify = ({ collegeId }) => {
     if (verified) {
       const timer = setTimeout(() => {
         navigate("/user");
-      }, 1000); // short delay for message display
+      }, 1000);
 
       return () => clearTimeout(timer);
     }

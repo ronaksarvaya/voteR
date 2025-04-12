@@ -1,15 +1,17 @@
 import React, { useState } from "react";
-import Verify from "./Verify";
+import { useNavigate } from "react-router-dom"; // ✅ Import here
+
 
 const Login = () => {
   const [collegeId, setCollegeId] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
+  const navigate = useNavigate(); // ✅ Add this
 
   const handleGetOTP = async (e) => {
     e.preventDefault();
-  
+
     if (collegeId === "admin_ronak" || collegeId === "user_ronak") {
       try {
         const res = await fetch("http://localhost:5000/direct-login", {
@@ -19,63 +21,66 @@ const Login = () => {
           },
           body: JSON.stringify({ collegeId })
         });
-  
+
         const data = await res.json();
-  
+
         if (!res.ok) {
           setError(data.error || "Login failed.");
           return;
         }
-  
+
         localStorage.setItem("token", data.token);
-  
+
         if (collegeId === "admin_ronak") {
           window.location.href = "/admin";
         } else {
           window.location.href = "/user";
         }
-  
       } catch (err) {
         setError("Direct login failed.");
         console.error(err);
       }
-  
+
       return;
     }
-  
+
     const regex = /^[0-9]{7}$/;
     if (!regex.test(collegeId)) {
       setError("College ID must be a 7-digit number.");
       return;
     }
-  
+
     // Proceed with normal OTP logic
     setError("");
     setLoading(true);
-  
+
     try {
-      const response = await fetch("http://localhost:5000/send-otp", {
+      const response = await fetch("http://localhost:5000/otp/send-otp", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({ collegeId })
       });
-  
+
       const data = await response.json();
       if (!response.ok) {
         setError(data.error || "Something went wrong");
       } else {
         setSent(true);
+        // ✅ Delay and redirect after OTP is sent
+        setTimeout(() => {
+          navigate("/verify", { state: { collegeId } });
+        }, 1000);
       }
     } catch (err) {
       setError("Failed to send OTP. Please try again.");
       console.error(err);
     }
-  
+
     setLoading(false);
   };
-  
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#C5E6A6] p-4">
       <div className="bg-white shadow-lg rounded-2xl p-6 w-full max-w-sm">
@@ -103,7 +108,11 @@ const Login = () => {
               loading ? "bg-gray-400 cursor-not-allowed" : "bg-[#248232] hover:bg-green-700"
             }`}
           >
-            {loading ? "Sending OTP..." : "Get OTP on student mail"}
+            {loading
+              ? "Sending OTP..."
+              : sent
+              ? "Check OTP on your student email"
+              : "Get OTP on student mail"}
           </button>
         </form>
         <p className="text-center text-sm mt-4 text-[#99621E]">
