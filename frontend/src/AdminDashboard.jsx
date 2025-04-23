@@ -112,7 +112,7 @@ const AdminDashboard = () => {
               {sortedStudents.map((student) => (
                 <tr
                   key={student["ID no"]}
-                  className={student.registeredAs ? "bg-green-100" : "bg-red-100"}
+                  className={student.registered ? "bg-green-100" : "bg-red-100"}
                 >
                   <td className="px-4 py-2">{student["ID no"]}</td>
                   <td className="px-4 py-2">{student["Full Name"]}</td>
