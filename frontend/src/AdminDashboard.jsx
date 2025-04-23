@@ -70,8 +70,8 @@ const AdminDashboard = () => {
   };
 
   const sortedStudents = [...students].sort((a, b) => {
-    const aRegistered = !!a.registeredAs;
-    const bRegistered = !!b.registeredAs;
+    const aRegistered = !!a.registered;
+    const bRegistered = !!b.registered;
     return aRegistered - bRegistered;
   });
 
