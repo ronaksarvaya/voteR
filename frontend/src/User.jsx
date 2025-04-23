@@ -70,8 +70,9 @@ const User = () => {
 
   const handleRegister = async (role) => {
     const token = localStorage.getItem("token");
-    const idNo = JSON.parse(atob(token.split(".")[1])).collegeId;
-
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    const idNo = payload.collegeId;
+  
     try {
       const response = await fetch(`${API_URL}/register`, {
         method: "POST",
@@ -84,23 +85,29 @@ const User = () => {
           manifesto: role === "candidate" ? manifesto : undefined,
         }),
       });
-
+  
       const data = await response.json();
       if (!response.ok) {
         setRegistrationMessage(data.error || "Registration failed.");
       } else {
         setRegistrationMessage(`Successfully registered as ${role}`);
-        setRegistered(true);
-        setRole(role);
-        setApproved(false);
         setRoleToRegister(null);
         setManifesto("");
+  
+        if (role === "voter") {
+          const candidateRes = await fetch(`${API_URL}/candidates`);
+          const candidateList = await candidateRes.json();
+          setCandidates(candidateList);
+          setRegistered(true);
+        }
+        
       }
     } catch (err) {
       console.error("Registration error:", err);
       setRegistrationMessage("Something went wrong.");
     }
   };
+  
 
   if (loading) {
     return <p className="text-center text-lg mt-10">Loading...</p>;

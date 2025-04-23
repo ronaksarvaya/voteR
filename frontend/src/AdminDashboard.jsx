@@ -70,8 +70,8 @@ const AdminDashboard = () => {
   };
 
   const sortedStudents = [...students].sort((a, b) => {
-    const aRegistered = !!a.registeredAs;
-    const bRegistered = !!b.registeredAs;
+    const aRegistered = !!a.registered;
+    const bRegistered = !!b.registered;
     return aRegistered - bRegistered;
   });
 
@@ -112,12 +112,12 @@ const AdminDashboard = () => {
               {sortedStudents.map((student) => (
                 <tr
                   key={student["ID no"]}
-                  className={student.registeredAs ? "bg-green-100" : "bg-red-100"}
+                  className={student.registered ? "bg-green-100" : "bg-red-100"}
                 >
                   <td className="px-4 py-2">{student["ID no"]}</td>
                   <td className="px-4 py-2">{student["Full Name"]}</td>
                   <td className="px-4 py-2">
-                    {student.registeredAs ? student.registeredAs.toUpperCase() : "NOT REGISTERED"}
+                    {student.registered ? "REGISTERED" : "NOT REGISTERED"}
                   </td>
                 </tr>
               ))}

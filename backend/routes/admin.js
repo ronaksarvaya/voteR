@@ -26,12 +26,13 @@ module.exports = (db) => {
     }
   });
 
-  // Get pending candidate approvals
+  // ✅ Get pending candidate approvals (consistent field names)
   router.get("/pending-candidates", async (req, res) => {
     try {
       const pending = await db.collection("students").find({
-        registeredAs: "candidate",
-        candidateApproved: false,
+        role: "candidate",
+        registered: true,
+        approved: false,
       }).toArray();
       res.json(pending);
     } catch (err) {
@@ -40,7 +41,7 @@ module.exports = (db) => {
     }
   });
 
-  // ✅ Approve candidate
+  // ✅ Approve candidate (consistent field names)
   router.post("/approve-candidate", async (req, res) => {
     const { collegeId } = req.body;
     if (!collegeId) {
@@ -49,8 +50,8 @@ module.exports = (db) => {
 
     try {
       const result = await db.collection("students").updateOne(
-        { "ID no": collegeId },
-        { $set: { candidateApproved: true } }
+        { "ID no": parseInt(collegeId) },
+        { $set: { approved: true } }
       );
 
       if (result.modifiedCount === 0) {

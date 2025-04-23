@@ -28,6 +28,21 @@ async function connectToDB() {
   app.use("/register", registerRoutes);
 }
 
+app.get("/candidates", async (req, res) => {
+  try {
+    const candidates = await db
+      .collection("students")
+      .find({ role: "candidate", approved: true })
+      .toArray();
+
+    res.json(candidates);
+  } catch (err) {
+    console.error("Error fetching candidates:", err);
+    res.status(500).json({ error: "Failed to fetch candidates" });
+  }
+});
+
+
 app.get("/", (req, res) => {
   res.send("Backend started");
 });
