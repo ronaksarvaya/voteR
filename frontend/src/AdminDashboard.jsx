@@ -117,7 +117,7 @@ const AdminDashboard = () => {
                   <td className="px-4 py-2">{student["ID no"]}</td>
                   <td className="px-4 py-2">{student["Full Name"]}</td>
                   <td className="px-4 py-2">
-                    {student.registeredAs ? student.registeredAs.toUpperCase() : "NOT REGISTERED"}
+                    {student.registered ? "REGISTERED" : "NOT REGISTERED"}
                   </td>
                 </tr>
               ))}
