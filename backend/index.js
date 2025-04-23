@@ -22,9 +22,10 @@ async function connectToDB() {
   // Load Routes
   const otpRoutes = require("./routes/otp")(db);
   const adminRoutes = require("./routes/admin")(db);
-
+  const registerRoutes = require("./routes/register")(db);
   app.use("/otp", otpRoutes);
   app.use("/admin", adminRoutes);
+  app.use("/register", registerRoutes);
 }
 
 app.get("/", (req, res) => {

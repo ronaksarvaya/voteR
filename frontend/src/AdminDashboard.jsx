@@ -1,20 +1,23 @@
 import React, { useEffect, useState } from "react";
-import {jwtDecode} from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 import { API_URL } from "./config";
 
 console.log(API_URL);
 
 const AdminDashboard = () => {
+  const [students, setStudents] = useState([]);
+  const [votes, setVotes] = useState([]);
+  const [pendingCandidates, setPendingCandidates] = useState([]);
+  const [activeTab, setActiveTab] = useState("students");
 
-
+  // Protect /admin route
   useEffect(() => {
-    {/*protecting /admin rooute */}
     const token = localStorage.getItem("token");
     if (!token) {
       window.location.href = "/login";
       return;
     }
-  
+
     try {
       const decoded = jwtDecode(token);
       if (decoded.role !== "admin") {
@@ -25,12 +28,6 @@ const AdminDashboard = () => {
       window.location.href = "/login";
     }
   }, []);
-  
-
-  const [students, setStudents] = useState([]);
-  const [votes, setVotes] = useState([]);
-  const [pendingCandidates, setPendingCandidates] = useState([]);
-  const [activeTab, setActiveTab] = useState("students");
 
   useEffect(() => {
     fetchData();
@@ -63,7 +60,7 @@ const AdminDashboard = () => {
       });
 
       if (res.ok) {
-        fetchData(); // refresh data
+        fetchData(); // Refresh data
       } else {
         alert("Failed to approve candidate");
       }
@@ -81,27 +78,25 @@ const AdminDashboard = () => {
   return (
     <div className="min-h-screen bg-gray-100 p-6">
       <h1 className="text-3xl font-bold mb-4 text-center text-[#30343F]">Admin Dashboard</h1>
+      
+      {/* Tab buttons */}
       <div className="flex justify-center gap-4 mb-6">
-        <button
-          onClick={() => setActiveTab("students")}
-          className={`px-4 py-2 rounded-lg ${activeTab === "students" ? "bg-[#248232] text-white" : "bg-white text-[#248232] border border-[#248232]"}`}
-        >
-          Students
-        </button>
-        <button
-          onClick={() => setActiveTab("votes")}
-          className={`px-4 py-2 rounded-lg ${activeTab === "votes" ? "bg-[#248232] text-white" : "bg-white text-[#248232] border border-[#248232]"}`}
-        >
-          Votes
-        </button>
-        <button
-          onClick={() => setActiveTab("candidates")}
-          className={`px-4 py-2 rounded-lg ${activeTab === "candidates" ? "bg-[#248232] text-white" : "bg-white text-[#248232] border border-[#248232]"}`}
-        >
-          Pending Candidates
-        </button>
+        {["students", "votes", "candidates"].map((tab) => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            className={`px-4 py-2 rounded-lg ${
+              activeTab === tab
+                ? "bg-[#248232] text-white"
+                : "bg-white text-[#248232] border border-[#248232]"
+            }`}
+          >
+            {tab === "students" ? "Students" : tab === "votes" ? "Votes" : "Pending Candidates"}
+          </button>
+        ))}
       </div>
 
+      {/* Students Tab */}
       {activeTab === "students" && (
         <div className="bg-white p-4 rounded-xl shadow-md">
           <h2 className="text-xl font-semibold mb-4">All Students</h2>
@@ -131,6 +126,7 @@ const AdminDashboard = () => {
         </div>
       )}
 
+      {/* Votes Tab */}
       {activeTab === "votes" && (
         <div className="bg-white p-4 rounded-xl shadow-md">
           <h2 className="text-xl font-semibold mb-4">Votes</h2>
@@ -153,6 +149,7 @@ const AdminDashboard = () => {
         </div>
       )}
 
+      {/* Candidates Tab */}
       {activeTab === "candidates" && (
         <div className="bg-white p-4 rounded-xl shadow-md">
           <h2 className="text-xl font-semibold mb-4">Pending Candidate Approvals</h2>
