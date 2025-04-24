@@ -42,6 +42,56 @@ app.get("/candidates", async (req, res) => {
   }
 });
 
+app.post("/vote", async (req, res) => {
+  try {
+    const { voterId, candidateId } = req.body
+
+    // Validate input
+    if (!voterId || !candidateId) {
+      return res.status(400).json({ error: "Voter ID and Candidate ID are required" })
+    }
+
+    // Check if voter exists and is registered
+    const voter = await db.collection("students").findOne({ "ID no": Number.parseInt(voterId) })
+    if (!voter) {
+      return res.status(404).json({ error: "Voter not found" })
+    }
+    if (!voter.registered || voter.role !== "voter") {
+      return res.status(403).json({ error: "You must be registered as a voter" })
+    }
+
+    // Check if candidate exists and is approved
+    const candidate = await db.collection("students").findOne({
+      "ID no": Number.parseInt(candidateId),
+      role: "candidate",
+      approved: true,
+    })
+    if (!candidate) {
+      return res.status(404).json({ error: "Candidate not found or not approved" })
+    }
+
+    // Check if voter has already voted
+    const existingVote = await db.collection("votes").findOne({ voterId: Number.parseInt(voterId) })
+    if (existingVote) {
+      return res.status(400).json({ error: "You have already voted" })
+    }
+
+    // Record the vote
+    await db.collection("votes").insertOne({
+      voterId: Number.parseInt(voterId),
+      candidateId: Number.parseInt(candidateId),
+      timestamp: new Date(),
+    })
+
+    res.json({ message: "Vote recorded successfully" })
+  } catch (err) {
+    console.error("Error recording vote:", err)
+    res.status(500).json({ error: "Failed to record vote" })
+  }
+})
+
+
+
 
 app.get("/", (req, res) => {
   res.send("Backend started");
