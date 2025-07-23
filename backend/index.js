@@ -23,9 +23,13 @@ async function connectToDB() {
   const otpRoutes = require("./routes/otp")(db);
   const adminRoutes = require("./routes/admin")(db);
   const registerRoutes = require("./routes/register")(db);
+  const authRoutes = require("./routes/auth")(db);
+  const sessionRoutes = require("./routes/session")(db);
   app.use("/otp", otpRoutes);
   app.use("/admin", adminRoutes);
   app.use("/register", registerRoutes);
+  app.use("/auth", authRoutes);
+  app.use("/session", sessionRoutes);
 }
 
 app.get("/candidates", async (req, res) => {
