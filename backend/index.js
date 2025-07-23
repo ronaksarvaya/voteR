@@ -6,7 +6,13 @@ const jwt = require("jsonwebtoken");
 
 const app = express();
 app.use(express.json());
-app.use(cors({ origin: "*", credentials: true }));
+app.use(cors({
+  origin: [
+    "https://vote-r.vercel.app", // your frontend domain
+    "http://localhost:5173"      // (optional) local dev
+  ],
+  credentials: true
+}));
 
 // DB Connection
 const uri = process.env.MONGO_URI

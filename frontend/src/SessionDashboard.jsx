@@ -88,6 +88,9 @@ const SessionDashboard = () => {
   return (
     <div className="min-h-screen bg-gray-100 p-6">
       <h2 className="text-2xl font-bold mb-4">Session: {session.title}</h2>
+      <button className="mb-6 bg-blue-600 text-white px-4 py-2 rounded" onClick={() => navigate(`/results/${sessionId}`)}>
+        View Live Results
+      </button>
       {isOwner ? (
         <>
           <form className="bg-white p-4 rounded shadow mb-6 max-w-lg" onSubmit={handleAddCandidate}>

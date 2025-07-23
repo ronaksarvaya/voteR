@@ -82,6 +82,7 @@ const Vote = () => {
             ))}
           </ul>
         )}
+        <button className="mt-6 bg-blue-600 text-white px-4 py-2 rounded w-full" onClick={() => window.location.href = `/results/${sessionId}`}>View Live Results</button>
       </div>
     </div>
   );
