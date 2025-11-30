@@ -24,6 +24,18 @@ module.exports = (db) => {
     },
   });
 
+  // Diagnostic endpoint to check configuration
+  router.get("/check-config", (req, res) => {
+    const config = {
+      emailConfigured: !!(process.env.EMAIL_USER && process.env.EMAIL_PASS),
+      emailUser: process.env.EMAIL_USER ? "Set (hidden)" : "Not set",
+      frontendUrl: process.env.FRONTEND_URL || "Not set (will use fallback)",
+      jwtSecret: process.env.JWT_SECRET ? "Set (hidden)" : "Not set",
+      mongoUri: process.env.MONGO_URI ? "Set (hidden)" : "Not set"
+    };
+    res.json(config);
+  });
+
   // Signup
   router.post("/signup", async (req, res) => {
     let { email, password, skipVerification } = req.body;
