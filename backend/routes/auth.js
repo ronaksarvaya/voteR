@@ -164,10 +164,12 @@ module.exports = (db) => {
     }
     email = email.trim().toLowerCase();
     console.log("Password reset request for:", email);
+    
     try {
       const user = await db.collection("users").findOne({ email });
       if (!user) {
         // Don't reveal if user exists or not for security
+        console.log("User not found, but returning success message");
         return res.json({ message: "If the email exists, a password reset link has been sent." });
       }
       
@@ -178,30 +180,55 @@ module.exports = (db) => {
         { email },
         { $set: { resetToken, resetTokenExpiry } }
       );
+      console.log("Reset token saved to database");
       
-      const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/reset-password/${resetToken}`;
+      // Get frontend URL from environment or request origin
+      const frontendUrl = process.env.FRONTEND_URL || 
+                         req.headers.origin || 
+                         (req.headers.referer ? new URL(req.headers.referer).origin : null) ||
+                         'https://vote-r.vercel.app';
       
-      await transporter.sendMail({
-        from: process.env.EMAIL_USER,
-        to: email,
-        subject: "VoteR - Password Reset Request",
-        html: `
-          <h2>Password Reset Request</h2>
-          <p>You requested to reset your password for VoteR.</p>
-          <p>Click the link below to reset your password:</p>
-          <a href="${resetUrl}" style="display: inline-block; padding: 10px 20px; background-color: #248232; color: white; text-decoration: none; border-radius: 5px;">Reset Password</a>
-          <p>Or copy and paste this link in your browser:</p>
-          <p>${resetUrl}</p>
-          <p>This link will expire in 1 hour.</p>
-          <p>If you didn't request this, please ignore this email.</p>
-        `,
-        text: `You requested to reset your password for VoteR.\n\nClick this link to reset your password: ${resetUrl}\n\nThis link will expire in 1 hour.\n\nIf you didn't request this, please ignore this email.`,
-      });
+      const resetUrl = `${frontendUrl}/reset-password/${resetToken}`;
+      console.log("Reset URL generated:", resetUrl);
+      
+      // Check if email credentials are configured
+      if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+        console.error("Email credentials not configured");
+        return res.status(500).json({ error: "Email service not configured. Please contact administrator." });
+      }
+      
+      try {
+        await transporter.sendMail({
+          from: process.env.EMAIL_USER,
+          to: email,
+          subject: "VoteR - Password Reset Request",
+          html: `
+            <h2>Password Reset Request</h2>
+            <p>You requested to reset your password for VoteR.</p>
+            <p>Click the link below to reset your password:</p>
+            <a href="${resetUrl}" style="display: inline-block; padding: 10px 20px; background-color: #248232; color: white; text-decoration: none; border-radius: 5px;">Reset Password</a>
+            <p>Or copy and paste this link in your browser:</p>
+            <p>${resetUrl}</p>
+            <p>This link will expire in 1 hour.</p>
+            <p>If you didn't request this, please ignore this email.</p>
+          `,
+          text: `You requested to reset your password for VoteR.\n\nClick this link to reset your password: ${resetUrl}\n\nThis link will expire in 1 hour.\n\nIf you didn't request this, please ignore this email.`,
+        });
+        console.log("Password reset email sent successfully to:", email);
+      } catch (emailError) {
+        console.error("Error sending email:", emailError);
+        // Still return success to user but log the error
+        return res.status(500).json({ 
+          error: "Failed to send reset email. Please check email configuration or try again later." 
+        });
+      }
       
       res.json({ message: "If the email exists, a password reset link has been sent." });
     } catch (err) {
       console.error("Forgot password error:", err);
-      res.status(500).json({ error: "Failed to process password reset request" });
+      res.status(500).json({ 
+        error: "Failed to process password reset request. Please try again later." 
+      });
     }
   });
 

@@ -9,9 +9,12 @@ app.use(express.json());
 app.use(cors({
   origin: [
     "https://vote-r.vercel.app", // your frontend domain
-    "http://localhost:5173"      // (optional) local dev
+    "http://localhost:5173",      // local dev
+    "http://localhost:5174"       // alternative local port
   ],
-  credentials: true
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Origin']
 }));
 
 // DB Connection
