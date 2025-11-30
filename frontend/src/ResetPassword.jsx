@@ -1,18 +1,52 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { API_URL } from "./config";
 
-const Signup = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+const ResetPassword = () => {
+  const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [skipVerification, setSkipVerification] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
+  const [validatingToken, setValidatingToken] = useState(true);
+  const [tokenValid, setTokenValid] = useState(false);
   const navigate = useNavigate();
+  const { token } = useParams();
+
+  useEffect(() => {
+    // Verify token on component mount
+    const verifyToken = async () => {
+      try {
+        const res = await fetch(`${API_URL}/auth/verify-reset-token`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ token })
+        });
+        
+        if (res.ok) {
+          setTokenValid(true);
+        } else {
+          const data = await res.json();
+          setError(data.error || "Invalid or expired reset link");
+          setTokenValid(false);
+        }
+      } catch (err) {
+        setError("Failed to verify reset link");
+        setTokenValid(false);
+      } finally {
+        setValidatingToken(false);
+      }
+    };
+
+    if (token) {
+      verifyToken();
+    } else {
+      setError("No reset token provided");
+      setValidatingToken(false);
+    }
+  }, [token]);
 
   const getPasswordStrength = (pass) => {
     if (!pass) return { strength: "", color: "" };
@@ -21,41 +55,37 @@ const Signup = () => {
     return { strength: "Strong", color: "text-green-500" };
   };
 
-  const passwordStrength = getPasswordStrength(password);
+  const passwordStrength = getPasswordStrength(newPassword);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     setSuccess("");
 
-    if (password !== confirmPassword) {
+    if (newPassword !== confirmPassword) {
       setError("Passwords do not match");
       return;
     }
 
-    if (password.length < 6) {
+    if (newPassword.length < 6) {
       setError("Password must be at least 6 characters long");
       return;
     }
 
     setLoading(true);
     try {
-      const res = await fetch(`${API_URL}/auth/signup`, {
+      const res = await fetch(`${API_URL}/auth/reset-password`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, skipVerification })
+        body: JSON.stringify({ token, newPassword })
       });
       const data = await res.json();
+      
       if (!res.ok) {
-        setError(data.error || "Signup failed");
+        setError(data.error || "Failed to reset password");
       } else {
-        if (data.requiresVerification) {
-          setSuccess("Signup successful! Please verify your email.");
-          setTimeout(() => navigate("/verify-signup", { state: { email } }), 1500);
-        } else {
-          setSuccess("Signup successful! You can now log in.");
-          setTimeout(() => navigate("/login"), 1500);
-        }
+        setSuccess("Password reset successful! Redirecting to login...");
+        setTimeout(() => navigate("/login"), 2000);
       }
     } catch (err) {
       setError("Network error. Please try again.");
@@ -64,34 +94,69 @@ const Signup = () => {
     }
   };
 
+  if (validatingToken) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-green-50 to-blue-50 p-4">
+        <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md text-center">
+          <svg className="animate-spin h-12 w-12 text-[#248232] mx-auto mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          <p className="text-gray-600">Verifying reset link...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!tokenValid) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-green-50 to-blue-50 p-4">
+        <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md text-center">
+          <div className="mx-auto w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
+            <span className="text-3xl">❌</span>
+          </div>
+          <h2 className="text-2xl font-bold mb-2 text-[#30343F]">Invalid Reset Link</h2>
+          <p className="text-gray-600 mb-6">{error || "This password reset link is invalid or has expired."}</p>
+          <button
+            onClick={() => navigate("/forgot-password")}
+            className="w-full bg-[#248232] text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition duration-200"
+          >
+            Request New Link
+          </button>
+          <p className="mt-4 text-sm text-gray-600">
+            <span 
+              className="text-[#248232] font-semibold cursor-pointer hover:underline" 
+              onClick={() => navigate("/login")}
+            >
+              Back to Login
+            </span>
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-green-50 to-blue-50 p-4">
       <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md">
-        <h2 className="text-3xl font-bold mb-2 text-center text-[#30343F]">Create Account</h2>
-        <p className="text-gray-600 text-center mb-6">Join VoteR today</p>
+        <div className="text-center mb-6">
+          <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
+            <span className="text-3xl">🔑</span>
+          </div>
+          <h2 className="text-3xl font-bold mb-2 text-[#30343F]">Reset Password</h2>
+          <p className="text-gray-600">Enter your new password below</p>
+        </div>
         
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block mb-2 font-semibold text-gray-700">Email</label>
-            <input 
-              type="email" 
-              className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#248232] focus:border-transparent transition" 
-              value={email} 
-              onChange={e => setEmail(e.target.value)} 
-              placeholder="your.email@example.com"
-              required 
-            />
-          </div>
-
-          <div>
-            <label className="block mb-2 font-semibold text-gray-700">Password</label>
+            <label className="block mb-2 font-semibold text-gray-700">New Password</label>
             <div className="relative">
               <input 
                 type={showPassword ? "text" : "password"}
                 className="w-full border border-gray-300 rounded-lg px-4 py-3 pr-12 focus:outline-none focus:ring-2 focus:ring-[#248232] focus:border-transparent transition" 
-                value={password} 
-                onChange={e => setPassword(e.target.value)} 
-                placeholder="Enter password"
+                value={newPassword} 
+                onChange={e => setNewPassword(e.target.value)} 
+                placeholder="Enter new password"
                 required 
               />
               <button
@@ -102,7 +167,7 @@ const Signup = () => {
                 {showPassword ? "👁️" : "👁️‍🗨️"}
               </button>
             </div>
-            {password && (
+            {newPassword && (
               <p className={`text-sm mt-1 ${passwordStrength.color}`}>
                 Password strength: {passwordStrength.strength}
               </p>
@@ -110,14 +175,14 @@ const Signup = () => {
           </div>
 
           <div>
-            <label className="block mb-2 font-semibold text-gray-700">Confirm Password</label>
+            <label className="block mb-2 font-semibold text-gray-700">Confirm New Password</label>
             <div className="relative">
               <input 
                 type={showConfirmPassword ? "text" : "password"}
                 className="w-full border border-gray-300 rounded-lg px-4 py-3 pr-12 focus:outline-none focus:ring-2 focus:ring-[#248232] focus:border-transparent transition" 
                 value={confirmPassword} 
                 onChange={e => setConfirmPassword(e.target.value)} 
-                placeholder="Confirm password"
+                placeholder="Confirm new password"
                 required 
               />
               <button
@@ -128,19 +193,6 @@ const Signup = () => {
                 {showConfirmPassword ? "👁️" : "👁️‍🗨️"}
               </button>
             </div>
-          </div>
-
-          <div className="flex items-center space-x-2 bg-blue-50 p-3 rounded-lg border border-blue-200">
-            <input 
-              type="checkbox" 
-              id="skipVerification"
-              checked={skipVerification}
-              onChange={(e) => setSkipVerification(e.target.checked)}
-              className="w-4 h-4 text-[#248232] focus:ring-[#248232] rounded"
-            />
-            <label htmlFor="skipVerification" className="text-sm text-gray-700 cursor-pointer">
-              Skip email verification (for testing)
-            </label>
           </div>
 
           {error && (
@@ -168,16 +220,16 @@ const Signup = () => {
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
-                Creating Account...
+                Resetting Password...
               </>
             ) : (
-              "Sign Up"
+              "Reset Password"
             )}
           </button>
         </form>
 
         <p className="mt-6 text-center text-sm text-gray-600">
-          Already have an account?{" "}
+          Remember your password?{" "}
           <span 
             className="text-[#248232] font-semibold cursor-pointer hover:underline" 
             onClick={() => navigate("/login")}
@@ -190,4 +242,4 @@ const Signup = () => {
   );
 };
 
-export default Signup;
+export default ResetPassword;

@@ -103,12 +103,29 @@ module.exports = (db) => {
     res.json({ message: "Vote recorded" });
   });
 
-  // List votes (for results)
-  router.get("/:code/votes", async (req, res) => {
+  // Verify if user is session owner
+  router.get("/:code/verify-owner", authMiddleware, async (req, res) => {
     const { code } = req.params;
+    const session = await db.collection("sessions").findOne({ code });
+    if (!session) return res.status(404).json({ error: "Session not found" });
+    const isOwner = session.ownerId.toString() === req.user.userId;
+    res.json({ isOwner });
+  });
+
+  // List votes (for results) - Only owner can access
+  router.get("/:code/votes", authMiddleware, async (req, res) => {
+    const { code } = req.params;
+    const session = await db.collection("sessions").findOne({ code });
+    if (!session) return res.status(404).json({ error: "Session not found" });
+    
+    // Check if user is the session owner
+    if (session.ownerId.toString() !== req.user.userId) {
+      return res.status(403).json({ error: "Only session owner can view results" });
+    }
+    
     const votes = await db.collection("votes").find({ sessionCode: code }).toArray();
     res.json(votes);
   });
 
   return router;
-}; 
+};

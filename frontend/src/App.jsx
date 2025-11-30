@@ -12,6 +12,8 @@ import Vote from "./Vote";
 import Results from "./Results";
 import Signup from "./Signup";
 import VerifySignup from "./VerifySignup";
+import ForgotPassword from "./ForgotPassword";
+import ResetPassword from "./ResetPassword";
 
 function isLoggedIn() {
   const token = localStorage.getItem("token");
@@ -38,9 +40,13 @@ const App = () => {
   return (
     <Router>
       <Routes>
+        {/* Public routes */}
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/verify-signup" element={<VerifySignup />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password/:token" element={<ResetPassword />} />
+        
         {/* Protected routes */}
         <Route path="/" element={<PrivateRoute><Home /></PrivateRoute>} />
         <Route path="/create-session" element={<PrivateRoute><CreateSession /></PrivateRoute>} />
