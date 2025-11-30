@@ -195,10 +195,7 @@ module.exports = (db) => {
       console.log("Reset token saved to database");
       
       // Get frontend URL from environment or request origin
-      const frontendUrl = process.env.FRONTEND_URL || 
-                         req.headers.origin || 
-                         (req.headers.referer ? new URL(req.headers.referer).origin : null) ||
-                         'https://vote-r.vercel.app';
+      const frontendUrl = process.env.FRONTEND_URL || 'https://vote-r.vercel.app';
       
       const resetUrl = `${frontendUrl}/reset-password/${resetToken}`;
       console.log("Reset URL generated:", resetUrl);
