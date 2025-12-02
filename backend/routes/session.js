@@ -22,11 +22,15 @@ module.exports = (db) => {
   const router = express.Router();
 
   // Create session
-  router.post("/create", async (req, res) => {
-    const { title, ownerId } = req.body;
-    if (!title || !ownerId) {
-      return res.status(400).json({ error: "Title and ownerId are required" });
+  router.post("/create", authMiddleware, async (req, res) => {
+    const { title } = req.body;
+    if (!title) {
+      return res.status(400).json({ error: "Title is required" });
     }
+
+    // Use userId from the authenticated token
+    const ownerId = req.user.userId;
+
     let code;
     let exists = true;
     // Ensure unique code
@@ -34,14 +38,32 @@ module.exports = (db) => {
       code = generateSessionCode();
       exists = await db.collection("sessions").findOne({ code });
     }
+
     const session = {
       title,
       code,
       ownerId: new ObjectId(ownerId),
       createdAt: new Date(),
     };
+
     await db.collection("sessions").insertOne(session);
     res.json({ message: "Session created", code });
+  });
+
+  // Get my sessions
+  router.get("/my-sessions", authMiddleware, async (req, res) => {
+    try {
+      const ownerId = new ObjectId(req.user.userId);
+      const sessions = await db.collection("sessions")
+        .find({ ownerId })
+        .sort({ createdAt: -1 })
+        .toArray();
+
+      res.json(sessions);
+    } catch (err) {
+      console.error("Error fetching user sessions:", err);
+      res.status(500).json({ error: "Failed to fetch sessions" });
+    }
   });
 
   // Get session by code
@@ -117,14 +139,38 @@ module.exports = (db) => {
     const { code } = req.params;
     const session = await db.collection("sessions").findOne({ code });
     if (!session) return res.status(404).json({ error: "Session not found" });
-    
+
     // Check if user is the session owner
     if (session.ownerId.toString() !== req.user.userId) {
       return res.status(403).json({ error: "Only session owner can view results" });
     }
-    
+
     const votes = await db.collection("votes").find({ sessionCode: code }).toArray();
     res.json(votes);
+  });
+
+  // Delete session - Only owner can delete
+  router.delete("/:code", authMiddleware, async (req, res) => {
+    const { code } = req.params;
+    const session = await db.collection("sessions").findOne({ code });
+    if (!session) return res.status(404).json({ error: "Session not found" });
+
+    // Check if user is the session owner
+    if (session.ownerId.toString() !== req.user.userId) {
+      return res.status(403).json({ error: "Only session owner can delete this session" });
+    }
+
+    try {
+      // Delete session, candidates, and votes
+      await db.collection("sessions").deleteOne({ code });
+      await db.collection("candidates").deleteMany({ sessionCode: code });
+      await db.collection("votes").deleteMany({ sessionCode: code });
+
+      res.json({ message: "Session deleted successfully" });
+    } catch (err) {
+      console.error("Error deleting session:", err);
+      res.status(500).json({ error: "Failed to delete session" });
+    }
   });
 
   return router;

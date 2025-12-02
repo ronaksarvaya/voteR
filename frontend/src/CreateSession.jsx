@@ -17,22 +17,15 @@ const CreateSession = () => {
       setError("You must be logged in to create a session.");
       return;
     }
-    let userId;
-    try {
-      // Decode JWT to get userId
-      const payload = JSON.parse(atob(token.split(".")[1]));
-      userId = payload.userId;
-    } catch {
-      setError("Invalid token. Please log in again.");
-      return;
-    }
+
     try {
       const res = await fetch(`${API_URL}/session/create`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
         },
-        body: JSON.stringify({ title, ownerId: userId })
+        body: JSON.stringify({ title })
       });
       const data = await res.json();
       if (!res.ok) {

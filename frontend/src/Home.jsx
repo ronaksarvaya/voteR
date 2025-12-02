@@ -13,7 +13,14 @@ const Home = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
       {/* Header with Logout */}
-      <div className="absolute top-0 right-0 p-6">
+      <div className="absolute top-0 right-0 p-6 flex gap-4">
+        <button
+          onClick={() => navigate("/my-sessions")}
+          className="px-4 py-2 bg-slate-800 text-slate-200 border border-slate-700 rounded-lg font-semibold hover:bg-slate-700 transition duration-200 shadow-md hover:shadow-lg flex items-center gap-2"
+        >
+          <span>📂</span>
+          My Sessions
+        </button>
         <button
           onClick={handleLogout}
           className="px-4 py-2 bg-slate-800 text-slate-200 border border-slate-700 rounded-lg font-semibold hover:bg-slate-700 transition duration-200 shadow-md hover:shadow-lg flex items-center gap-2"
