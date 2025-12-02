@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { API_URL } from "./config";
+import logo from "./assets/logo.png";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -36,22 +37,22 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-green-50 to-blue-50 p-4">
-      <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md">
-        <div className="text-center mb-6">
-          <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
-            <span className="text-3xl">🗳️</span>
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-slate-900 to-slate-800 p-4">
+      <div className="bg-slate-800 p-8 rounded-2xl shadow-2xl w-full max-w-md border border-slate-700">
+        <div className="text-center mb-8">
+          <div className="mx-auto w-24 h-24 mb-4 relative">
+             <img src={logo} alt="VoteR Logo" className="w-full h-full object-contain drop-shadow-lg" />
           </div>
-          <h2 className="text-3xl font-bold mb-2 text-[#30343F]">Welcome Back</h2>
-          <p className="text-gray-600">Log in to your VoteR account</p>
+          <h2 className="text-3xl font-bold mb-2 text-white">Welcome Back</h2>
+          <p className="text-slate-400">Log in to your VoteR account</p>
         </div>
         
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label className="block mb-2 font-semibold text-gray-700">Email</label>
+            <label className="block mb-2 font-semibold text-slate-300">Email</label>
             <input 
               type="email" 
-              className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#248232] focus:border-transparent transition" 
+              className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#248232] focus:border-transparent transition placeholder-slate-500" 
               value={email} 
               onChange={e => setEmail(e.target.value)} 
               placeholder="your.email@example.com"
@@ -60,11 +61,11 @@ const Login = () => {
           </div>
 
           <div>
-            <label className="block mb-2 font-semibold text-gray-700">Password</label>
+            <label className="block mb-2 font-semibold text-slate-300">Password</label>
             <div className="relative">
               <input 
                 type={showPassword ? "text" : "password"}
-                className="w-full border border-gray-300 rounded-lg px-4 py-3 pr-12 focus:outline-none focus:ring-2 focus:ring-[#248232] focus:border-transparent transition" 
+                className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 pr-12 text-white focus:outline-none focus:ring-2 focus:ring-[#248232] focus:border-transparent transition placeholder-slate-500" 
                 value={password} 
                 onChange={e => setPassword(e.target.value)} 
                 placeholder="Enter your password"
@@ -73,7 +74,7 @@ const Login = () => {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-500 hover:text-slate-300"
               >
                 {showPassword ? "👁️" : "👁️‍🗨️"}
               </button>
@@ -82,7 +83,7 @@ const Login = () => {
 
           <div className="flex justify-end">
             <span 
-              className="text-sm text-[#248232] font-semibold cursor-pointer hover:underline" 
+              className="text-sm text-[#248232] font-semibold cursor-pointer hover:text-green-400 transition" 
               onClick={() => navigate("/forgot-password")}
             >
               Forgot Password?
@@ -90,14 +91,14 @@ const Login = () => {
           </div>
 
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-center">
+            <div className="bg-red-900/30 border border-red-800 text-red-200 px-4 py-3 rounded-lg flex items-center">
               <span className="mr-2">❌</span>
               {error}
             </div>
           )}
 
           <button 
-            className="w-full bg-[#248232] text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition duration-200 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center" 
+            className="w-full bg-[#248232] text-white py-3 rounded-lg font-semibold hover:bg-green-600 transition duration-200 shadow-lg hover:shadow-green-900/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center" 
             type="submit"
             disabled={loading}
           >
@@ -115,10 +116,10 @@ const Login = () => {
           </button>
         </form>
 
-        <p className="mt-6 text-center text-sm text-gray-600">
+        <p className="mt-8 text-center text-sm text-slate-400">
           Don't have an account?{" "}
           <span 
-            className="text-[#248232] font-semibold cursor-pointer hover:underline" 
+            className="text-[#248232] font-semibold cursor-pointer hover:text-green-400 transition" 
             onClick={() => navigate("/signup")}
           >
             Sign up

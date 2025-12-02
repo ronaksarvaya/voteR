@@ -17,14 +17,20 @@ const JoinSession = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100">
-      <h2 className="text-2xl font-bold mb-4">Join a Voting Session</h2>
-      <form className="bg-white p-6 rounded-lg shadow-md w-full max-w-md" onSubmit={handleSubmit}>
-        <div className="mb-4">
-          <label className="block mb-2 font-semibold">Session Code or Link</label>
-          <input className="w-full border rounded px-3 py-2" value={input} onChange={e => setInput(e.target.value)} required placeholder="Enter session code or link" />
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-slate-900 to-slate-800 p-4">
+      <h2 className="text-3xl font-bold mb-8 text-white">Join a Voting Session</h2>
+      <form className="bg-slate-800 p-8 rounded-2xl shadow-2xl w-full max-w-md border border-slate-700" onSubmit={handleSubmit}>
+        <div className="mb-6">
+          <label className="block mb-2 font-semibold text-slate-300">Session Code or Link</label>
+          <input
+            className="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#248232] focus:border-transparent transition placeholder-slate-500"
+            value={input}
+            onChange={e => setInput(e.target.value)}
+            required
+            placeholder="Enter session code or link"
+          />
         </div>
-        <button className="w-full bg-[#248232] text-white py-2 rounded-lg font-semibold" type="submit">
+        <button className="w-full bg-[#248232] text-white py-3 rounded-lg font-semibold hover:bg-green-600 transition duration-200 shadow-lg hover:shadow-green-900/20" type="submit">
           Join Session
         </button>
       </form>
@@ -32,4 +38,4 @@ const JoinSession = () => {
   );
 };
 
-export default JoinSession; 
+export default JoinSession;

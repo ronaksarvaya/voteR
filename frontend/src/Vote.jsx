@@ -31,7 +31,7 @@ const Vote = () => {
       try {
         const payload = JSON.parse(atob(token.split(".")[1]));
         if (votes.some(v => v.userId === payload.userId)) setVoted(true);
-      } catch {}
+      } catch { }
     }
   };
 
@@ -57,35 +57,57 @@ const Vote = () => {
     } catch { setError("Network error"); }
   };
 
-  if (loading) return <div className="p-8">Loading candidates...</div>;
+  if (loading) return <div className="p-8 text-white">Loading candidates...</div>;
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100">
-      <div className="bg-white p-6 rounded shadow max-w-lg w-full">
-        <h2 className="text-2xl font-bold mb-4">Vote for a Candidate</h2>
-        {error && <div className="text-red-600 mb-2">{error}</div>}
-        {success && <div className="text-green-600 mb-2">{success}</div>}
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-slate-900 to-slate-800 p-4">
+      <div className="bg-slate-800 p-8 rounded-2xl shadow-2xl max-w-lg w-full border border-slate-700">
+        <h2 className="text-3xl font-bold mb-6 text-white text-center">Vote for a Candidate</h2>
+        {error && (
+          <div className="bg-red-900/30 border border-red-800 text-red-200 px-4 py-3 rounded-lg mb-4 flex items-center">
+            <span className="mr-2">❌</span>
+            {error}
+          </div>
+        )}
+        {success && (
+          <div className="bg-green-900/30 border border-green-800 text-green-200 px-4 py-3 rounded-lg mb-4 flex items-center">
+            <span className="mr-2">✅</span>
+            {success}
+          </div>
+        )}
         {voted ? (
-          <div className="text-lg text-green-700 font-semibold">You have already voted in this session.</div>
+          <div className="text-center py-8">
+            <div className="text-6xl mb-4">✅</div>
+            <div className="text-xl text-green-400 font-semibold mb-2">Vote Recorded!</div>
+            <p className="text-slate-400">You have already voted in this session.</p>
+          </div>
         ) : (
-          <ul>
+          <ul className="space-y-4">
             {candidates.map(c => (
-              <li key={c._id} className="mb-4 flex justify-between items-center">
+              <li key={c._id} className="bg-slate-900 border border-slate-600 rounded-lg p-4 flex justify-between items-center hover:border-[#248232] transition duration-200">
                 <div>
-                  <span className="font-semibold">{c.name}</span>
-                  {c.manifesto && <span className="text-gray-600 ml-2">({c.manifesto})</span>}
+                  <span className="font-bold text-white text-lg block">{c.name}</span>
+                  {c.manifesto && <span className="text-slate-400 text-sm">{c.manifesto}</span>}
                 </div>
-                <button className="bg-[#248232] text-white px-4 py-2 rounded" onClick={() => handleVote(c._id)}>
+                <button
+                  className="bg-[#248232] text-white px-6 py-2 rounded-lg font-semibold hover:bg-green-600 transition shadow-md"
+                  onClick={() => handleVote(c._id)}
+                >
                   Vote
                 </button>
               </li>
             ))}
           </ul>
         )}
-        <button className="mt-6 bg-blue-600 text-white px-4 py-2 rounded w-full" onClick={() => window.location.href = `/results/${sessionId}`}>View Live Results</button>
+        <button
+          className="mt-8 w-full bg-blue-600 text-white px-4 py-3 rounded-lg font-semibold hover:bg-blue-500 transition shadow-lg"
+          onClick={() => window.location.href = `/results/${sessionId}`}
+        >
+          View Live Results
+        </button>
       </div>
     </div>
   );
 };
 
-export default Vote; 
+export default Vote;

@@ -16,9 +16,9 @@ const Signup = () => {
 
   const getPasswordStrength = (pass) => {
     if (!pass) return { strength: "", color: "" };
-    if (pass.length < 6) return { strength: "Weak", color: "text-red-500" };
-    if (pass.length < 10) return { strength: "Medium", color: "text-yellow-500" };
-    return { strength: "Strong", color: "text-green-500" };
+    if (pass.length < 6) return { strength: "Weak", color: "text-red-400" };
+    if (pass.length < 10) return { strength: "Medium", color: "text-yellow-400" };
+    return { strength: "Strong", color: "text-green-400" };
   };
 
   const passwordStrength = getPasswordStrength(password);
@@ -65,100 +65,100 @@ const Signup = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-green-50 to-blue-50 p-4">
-      <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md">
-        <h2 className="text-3xl font-bold mb-2 text-center text-[#30343F]">Create Account</h2>
-        <p className="text-gray-600 text-center mb-6">Join VoteR today</p>
-        
-        <form onSubmit={handleSubmit} className="space-y-4">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-slate-900 to-slate-800 p-4">
+      <div className="bg-slate-800 p-8 rounded-2xl shadow-2xl w-full max-w-md border border-slate-700">
+        <h2 className="text-3xl font-bold mb-2 text-center text-white">Create Account</h2>
+        <p className="text-slate-400 text-center mb-8">Join VoteR today</p>
+
+        <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label className="block mb-2 font-semibold text-gray-700">Email</label>
-            <input 
-              type="email" 
-              className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#248232] focus:border-transparent transition" 
-              value={email} 
-              onChange={e => setEmail(e.target.value)} 
+            <label className="block mb-2 font-semibold text-slate-300">Email</label>
+            <input
+              type="email"
+              className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#248232] focus:border-transparent transition placeholder-slate-500"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
               placeholder="your.email@example.com"
-              required 
+              required
             />
           </div>
 
           <div>
-            <label className="block mb-2 font-semibold text-gray-700">Password</label>
+            <label className="block mb-2 font-semibold text-slate-300">Password</label>
             <div className="relative">
-              <input 
+              <input
                 type={showPassword ? "text" : "password"}
-                className="w-full border border-gray-300 rounded-lg px-4 py-3 pr-12 focus:outline-none focus:ring-2 focus:ring-[#248232] focus:border-transparent transition" 
-                value={password} 
-                onChange={e => setPassword(e.target.value)} 
+                className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 pr-12 text-white focus:outline-none focus:ring-2 focus:ring-[#248232] focus:border-transparent transition placeholder-slate-500"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
                 placeholder="Enter password"
-                required 
+                required
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-500 hover:text-slate-300"
               >
                 {showPassword ? "👁️" : "👁️‍🗨️"}
               </button>
             </div>
             {password && (
-              <p className={`text-sm mt-1 ${passwordStrength.color}`}>
+              <p className={`text-sm mt-2 ${passwordStrength.color}`}>
                 Password strength: {passwordStrength.strength}
               </p>
             )}
           </div>
 
           <div>
-            <label className="block mb-2 font-semibold text-gray-700">Confirm Password</label>
+            <label className="block mb-2 font-semibold text-slate-300">Confirm Password</label>
             <div className="relative">
-              <input 
+              <input
                 type={showConfirmPassword ? "text" : "password"}
-                className="w-full border border-gray-300 rounded-lg px-4 py-3 pr-12 focus:outline-none focus:ring-2 focus:ring-[#248232] focus:border-transparent transition" 
-                value={confirmPassword} 
-                onChange={e => setConfirmPassword(e.target.value)} 
+                className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 pr-12 text-white focus:outline-none focus:ring-2 focus:ring-[#248232] focus:border-transparent transition placeholder-slate-500"
+                value={confirmPassword}
+                onChange={e => setConfirmPassword(e.target.value)}
                 placeholder="Confirm password"
-                required 
+                required
               />
               <button
                 type="button"
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-500 hover:text-slate-300"
               >
                 {showConfirmPassword ? "👁️" : "👁️‍🗨️"}
               </button>
             </div>
           </div>
 
-          <div className="flex items-center space-x-2 bg-blue-50 p-3 rounded-lg border border-blue-200">
-            <input 
-              type="checkbox" 
+          <div className="flex items-center space-x-2 bg-slate-900/50 p-3 rounded-lg border border-slate-700">
+            <input
+              type="checkbox"
               id="skipVerification"
               checked={skipVerification}
               onChange={(e) => setSkipVerification(e.target.checked)}
-              className="w-4 h-4 text-[#248232] focus:ring-[#248232] rounded"
+              className="w-4 h-4 text-[#248232] focus:ring-[#248232] rounded bg-slate-800 border-slate-600"
             />
-            <label htmlFor="skipVerification" className="text-sm text-gray-700 cursor-pointer">
+            <label htmlFor="skipVerification" className="text-sm text-slate-300 cursor-pointer">
               Skip email verification (for testing)
             </label>
           </div>
 
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-center">
+            <div className="bg-red-900/30 border border-red-800 text-red-200 px-4 py-3 rounded-lg flex items-center">
               <span className="mr-2">❌</span>
               {error}
             </div>
           )}
-          
+
           {success && (
-            <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg flex items-center">
+            <div className="bg-green-900/30 border border-green-800 text-green-200 px-4 py-3 rounded-lg flex items-center">
               <span className="mr-2">✅</span>
               {success}
             </div>
           )}
 
-          <button 
-            className="w-full bg-[#248232] text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition duration-200 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center" 
+          <button
+            className="w-full bg-[#248232] text-white py-3 rounded-lg font-semibold hover:bg-green-600 transition duration-200 shadow-lg hover:shadow-green-900/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
             type="submit"
             disabled={loading}
           >
@@ -176,10 +176,10 @@ const Signup = () => {
           </button>
         </form>
 
-        <p className="mt-6 text-center text-sm text-gray-600">
+        <p className="mt-8 text-center text-sm text-slate-400">
           Already have an account?{" "}
-          <span 
-            className="text-[#248232] font-semibold cursor-pointer hover:underline" 
+          <span
+            className="text-[#248232] font-semibold cursor-pointer hover:text-green-400 transition"
             onClick={() => navigate("/login")}
           >
             Log in

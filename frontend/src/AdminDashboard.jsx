@@ -114,8 +114,8 @@ const AdminDashboard = () => {
   })
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
-      <h1 className="text-3xl font-bold mb-4 text-center text-[#30343F]">Admin Dashboard</h1>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 p-6">
+      <h1 className="text-3xl font-bold mb-4 text-center text-white">Admin Dashboard</h1>
 
       {/* Tab buttons */}
       <div className="flex justify-center gap-4 mb-6">
@@ -123,9 +123,8 @@ const AdminDashboard = () => {
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`px-4 py-2 rounded-lg ${
-              activeTab === tab ? "bg-[#248232] text-white" : "bg-white text-[#248232] border border-[#248232]"
-            }`}
+            className={`px-4 py-2 rounded-lg transition duration-200 ${activeTab === tab ? "bg-[#248232] text-white" : "bg-slate-700 text-slate-300 border border-slate-600 hover:bg-slate-600"
+              }`}
           >
             {tab === "students"
               ? "Students"
@@ -140,88 +139,92 @@ const AdminDashboard = () => {
 
       {/* Students Tab */}
       {activeTab === "students" && (
-        <div className="bg-white p-4 rounded-xl shadow-md">
-          <h2 className="text-xl font-semibold mb-4">All Students</h2>
-          <table className="w-full table-auto">
-            <thead>
-              <tr className="bg-gray-200 text-left">
-                <th className="px-4 py-2">ID</th>
-                <th className="px-4 py-2">Name</th>
-                <th className="px-4 py-2">Status</th>
-                <th className="px-4 py-2">Role</th>
-              </tr>
-            </thead>
-            <tbody>
-              {sortedStudents.map((student) => (
-                <tr key={student["ID no"]} className={student.registered ? "bg-green-100" : "bg-red-100"}>
-                  <td className="px-4 py-2">{student["ID no"]}</td>
-                  <td className="px-4 py-2">{student["Full Name"]}</td>
-                  <td className="px-4 py-2">{student.registered ? "REGISTERED" : "NOT REGISTERED"}</td>
-                  <td className="px-4 py-2">{student.role || "N/A"}</td>
+        <div className="bg-slate-800 p-4 rounded-xl shadow-md border border-slate-700">
+          <h2 className="text-xl font-semibold mb-4 text-white">All Students</h2>
+          <div className="overflow-x-auto">
+            <table className="w-full table-auto text-slate-300">
+              <thead>
+                <tr className="bg-slate-700 text-left">
+                  <th className="px-4 py-2">ID</th>
+                  <th className="px-4 py-2">Name</th>
+                  <th className="px-4 py-2">Status</th>
+                  <th className="px-4 py-2">Role</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {sortedStudents.map((student) => (
+                  <tr key={student["ID no"]} className={`border-b border-slate-700 ${student.registered ? "bg-green-900/20" : "bg-red-900/20"}`}>
+                    <td className="px-4 py-2">{student["ID no"]}</td>
+                    <td className="px-4 py-2">{student["Full Name"]}</td>
+                    <td className="px-4 py-2">{student.registered ? "REGISTERED" : "NOT REGISTERED"}</td>
+                    <td className="px-4 py-2">{student.role || "N/A"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 
       {/* Votes Tab */}
       {activeTab === "votes" && (
-        <div className="bg-white p-4 rounded-xl shadow-md">
-          <h2 className="text-xl font-semibold mb-4">Votes</h2>
-          <p className="mb-4">
-            Total votes cast: <span className="font-bold">{votes.length}</span>
+        <div className="bg-slate-800 p-4 rounded-xl shadow-md border border-slate-700">
+          <h2 className="text-xl font-semibold mb-4 text-white">Votes</h2>
+          <p className="mb-4 text-slate-300">
+            Total votes cast: <span className="font-bold text-white">{votes.length}</span>
           </p>
-          <table className="w-full table-auto">
-            <thead>
-              <tr className="bg-gray-200 text-left">
-                <th className="px-4 py-2">Voter ID</th>
-                <th className="px-4 py-2">Voter Name</th>
-                <th className="px-4 py-2">Candidate ID</th>
-                <th className="px-4 py-2">Candidate Name</th>
-                <th className="px-4 py-2">Timestamp</th>
-              </tr>
-            </thead>
-            <tbody>
-              {votes.map((vote, i) => {
-                const voter = students.find((s) => s["ID no"] === vote.voterId)
-                const candidate = students.find((s) => s["ID no"] === vote.candidateId)
-                return (
-                  <tr key={i} className="border-t">
-                    <td className="px-4 py-2">{vote.voterId}</td>
-                    <td className="px-4 py-2">{voter ? voter["Full Name"] : "Unknown"}</td>
-                    <td className="px-4 py-2">{vote.candidateId}</td>
-                    <td className="px-4 py-2">{candidate ? candidate["Full Name"] : "Unknown"}</td>
-                    <td className="px-4 py-2">{vote.timestamp ? new Date(vote.timestamp).toLocaleString() : "N/A"}</td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
+          <div className="overflow-x-auto">
+            <table className="w-full table-auto text-slate-300">
+              <thead>
+                <tr className="bg-slate-700 text-left">
+                  <th className="px-4 py-2">Voter ID</th>
+                  <th className="px-4 py-2">Voter Name</th>
+                  <th className="px-4 py-2">Candidate ID</th>
+                  <th className="px-4 py-2">Candidate Name</th>
+                  <th className="px-4 py-2">Timestamp</th>
+                </tr>
+              </thead>
+              <tbody>
+                {votes.map((vote, i) => {
+                  const voter = students.find((s) => s["ID no"] === vote.voterId)
+                  const candidate = students.find((s) => s["ID no"] === vote.candidateId)
+                  return (
+                    <tr key={i} className="border-b border-slate-700 hover:bg-slate-700/50">
+                      <td className="px-4 py-2">{vote.voterId}</td>
+                      <td className="px-4 py-2">{voter ? voter["Full Name"] : "Unknown"}</td>
+                      <td className="px-4 py-2">{vote.candidateId}</td>
+                      <td className="px-4 py-2">{candidate ? candidate["Full Name"] : "Unknown"}</td>
+                      <td className="px-4 py-2">{vote.timestamp ? new Date(vote.timestamp).toLocaleString() : "N/A"}</td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 
       {/* Candidates Tab */}
       {activeTab === "candidates" && (
-        <div className="bg-white p-4 rounded-xl shadow-md">
-          <h2 className="text-xl font-semibold mb-4">Pending Candidate Approvals</h2>
+        <div className="bg-slate-800 p-4 rounded-xl shadow-md border border-slate-700">
+          <h2 className="text-xl font-semibold mb-4 text-white">Pending Candidate Approvals</h2>
           {pendingCandidates.length === 0 ? (
-            <p className="text-gray-600">No pending approvals.</p>
+            <p className="text-slate-400">No pending approvals.</p>
           ) : (
             <ul className="space-y-2">
               {pendingCandidates.map((candidate) => (
-                <li key={candidate["ID no"]} className="flex justify-between items-center border p-3 rounded-lg">
+                <li key={candidate["ID no"]} className="flex justify-between items-center border border-slate-600 p-3 rounded-lg bg-slate-900">
                   <div>
-                    <span className="font-medium">
+                    <span className="font-medium text-white">
                       {candidate["Full Name"]} ({candidate["ID no"]})
                     </span>
                     {candidate.manifesto && (
-                      <p className="text-sm text-gray-600 mt-1">Manifesto: {candidate.manifesto}</p>
+                      <p className="text-sm text-slate-400 mt-1">Manifesto: {candidate.manifesto}</p>
                     )}
                   </div>
                   <button
                     onClick={() => handleApprove(candidate["ID no"])}
-                    className="bg-[#248232] text-white px-4 py-1 rounded-lg hover:bg-green-700"
+                    className="bg-[#248232] text-white px-4 py-1 rounded-lg hover:bg-green-600 transition duration-200"
                   >
                     Approve
                   </button>
@@ -234,34 +237,34 @@ const AdminDashboard = () => {
 
       {/* Results Tab */}
       {activeTab === "results" && (
-        <div className="bg-white p-4 rounded-xl shadow-md">
-          <h2 className="text-xl font-semibold mb-4">Election Results</h2>
-          <p className="mb-4">
-            Total votes cast: <span className="font-bold">{totalVotes}</span>
+        <div className="bg-slate-800 p-4 rounded-xl shadow-md border border-slate-700">
+          <h2 className="text-xl font-semibold mb-4 text-white">Election Results</h2>
+          <p className="mb-4 text-slate-300">
+            Total votes cast: <span className="font-bold text-white">{totalVotes}</span>
           </p>
 
           {voteStats.length === 0 ? (
-            <p className="text-gray-600">No votes have been cast yet.</p>
+            <p className="text-slate-400">No votes have been cast yet.</p>
           ) : (
             <div className="space-y-6">
               {voteStats.map((candidate, index) => (
-                <div key={candidate.id} className="border rounded-lg p-4">
+                <div key={candidate.id} className="border border-slate-600 rounded-lg p-4 bg-slate-900">
                   <div className="flex justify-between items-center mb-2">
-                    <h3 className="text-lg font-semibold">
+                    <h3 className="text-lg font-semibold text-white">
                       {index === 0 && totalVotes > 0 && <span className="text-yellow-500 mr-2">👑</span>}
                       {candidate.name}
                     </h3>
-                    <span className="font-bold text-lg">
+                    <span className="font-bold text-lg text-[#248232]">
                       {candidate.votes} votes ({candidate.percentage}%)
                     </span>
                   </div>
 
-                  <div className="w-full bg-gray-200 rounded-full h-4 mb-2">
-                    <div className="bg-[#248232] h-4 rounded-full" style={{ width: `${candidate.percentage}%` }}></div>
+                  <div className="w-full bg-slate-700 rounded-full h-4 mb-2">
+                    <div className="bg-gradient-to-r from-green-500 to-green-600 h-4 rounded-full transition-all duration-500" style={{ width: `${candidate.percentage}%` }}></div>
                   </div>
 
                   {candidate.manifesto && (
-                    <p className="text-sm text-gray-600 mt-2">Manifesto: {candidate.manifesto}</p>
+                    <p className="text-sm text-slate-400 mt-2">Manifesto: {candidate.manifesto}</p>
                   )}
                 </div>
               ))}

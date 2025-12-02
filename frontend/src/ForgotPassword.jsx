@@ -22,7 +22,7 @@ const ForgotPassword = () => {
         body: JSON.stringify({ email })
       });
       const data = await res.json();
-      
+
       if (!res.ok) {
         setError(data.error || "Failed to send reset email");
       } else {
@@ -37,38 +37,38 @@ const ForgotPassword = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-green-50 to-blue-50 p-4">
-      <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-slate-900 to-slate-800 p-4">
+      <div className="bg-slate-800 p-8 rounded-2xl shadow-xl w-full max-w-md border border-slate-700">
         <div className="text-center mb-6">
-          <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
+          <div className="mx-auto w-16 h-16 bg-green-900/30 rounded-full flex items-center justify-center mb-4">
             <span className="text-3xl">🔐</span>
           </div>
-          <h2 className="text-3xl font-bold mb-2 text-[#30343F]">Forgot Password?</h2>
-          <p className="text-gray-600">No worries! Enter your email and we'll send you a reset link.</p>
+          <h2 className="text-3xl font-bold mb-2 text-white">Forgot Password?</h2>
+          <p className="text-slate-400">No worries! Enter your email and we'll send you a reset link.</p>
         </div>
-        
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block mb-2 font-semibold text-gray-700">Email Address</label>
-            <input 
-              type="email" 
-              className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#248232] focus:border-transparent transition" 
-              value={email} 
-              onChange={e => setEmail(e.target.value)} 
+            <label className="block mb-2 font-semibold text-slate-300">Email Address</label>
+            <input
+              type="email"
+              className="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#248232] focus:border-transparent transition placeholder-slate-500"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
               placeholder="your.email@example.com"
-              required 
+              required
             />
           </div>
 
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-center">
+            <div className="bg-red-900/30 border border-red-800 text-red-200 px-4 py-3 rounded-lg flex items-center">
               <span className="mr-2">❌</span>
               {error}
             </div>
           )}
-          
+
           {success && (
-            <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg">
+            <div className="bg-green-900/30 border border-green-800 text-green-200 px-4 py-3 rounded-lg">
               <div className="flex items-start">
                 <span className="mr-2 mt-0.5">✅</span>
                 <div>
@@ -79,8 +79,8 @@ const ForgotPassword = () => {
             </div>
           )}
 
-          <button 
-            className="w-full bg-[#248232] text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition duration-200 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center" 
+          <button
+            className="w-full bg-[#248232] text-white py-3 rounded-lg font-semibold hover:bg-green-600 transition duration-200 shadow-md hover:shadow-green-900/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
             type="submit"
             disabled={loading}
           >
@@ -99,19 +99,19 @@ const ForgotPassword = () => {
         </form>
 
         <div className="mt-6 text-center space-y-2">
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-slate-400">
             Remember your password?{" "}
-            <span 
-              className="text-[#248232] font-semibold cursor-pointer hover:underline" 
+            <span
+              className="text-[#248232] font-semibold cursor-pointer hover:underline"
               onClick={() => navigate("/login")}
             >
               Log in
             </span>
           </p>
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-slate-400">
             Don't have an account?{" "}
-            <span 
-              className="text-[#248232] font-semibold cursor-pointer hover:underline" 
+            <span
+              className="text-[#248232] font-semibold cursor-pointer hover:underline"
               onClick={() => navigate("/signup")}
             >
               Sign up

@@ -1,91 +1,64 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { API_URL } from "./config";
-
 
 const Verify = () => {
   const [otp, setOtp] = useState("");
   const [error, setError] = useState("");
-  const [verified, setVerified] = useState(false);
   const navigate = useNavigate();
-  const location = useLocation();
-  const collegeId = location.state?.collegeId;
 
-  // Redirect if collegeId is not available
-  useEffect(() => {
-    if (!collegeId) {
-      navigate("/login");
-    }
-  }, [collegeId, navigate]);
-
-  const handleVerifyOTP = async (e) => {
-    e.preventDefault();
-
+  const handleVerify = async () => {
     try {
-      const response = await fetch(`${API_URL}/otp/verify-otp`, {
+      const response = await fetch(`${API_URL}/verify`, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify({ collegeId, otp })
+        body: JSON.stringify({ otp }),
       });
 
       const data = await response.json();
-      if (!response.ok) {
-        setError(data.error || "OTP verification failed");
+      if (response.ok) {
+        alert("Verification Successful! Redirecting to login...");
+        navigate("/login");
       } else {
-        localStorage.setItem("token", data.token);
-        setVerified(true);
+        setError(data.error || "Invalid OTP");
       }
     } catch (err) {
-      setError("Verification failed.");
-      console.error(err);
+      setError("Something went wrong");
     }
   };
 
-  // Navigate after successful verification
-  useEffect(() => {
-    if (verified) {
-      const timer = setTimeout(() => {
-        navigate("/user");
-      }, 1000);
-
-      return () => clearTimeout(timer);
-    }
-  }, [verified, navigate]);
-
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#C5E6A6] p-4">
-      <div className="bg-white shadow-lg rounded-2xl p-6 w-full max-w-sm">
-        <h1 className="text-2xl font-bold text-[#30343F] text-center mb-6">
-          Verify OTP
-        </h1>
-        {verified ? (
-          <p className="text-green-600 text-center font-semibold">
-            🎉 OTP Verified! Redirecting...
-          </p>
-        ) : (
-          <form onSubmit={handleVerifyOTP} className="space-y-4">
-            <div>
-              <label className="block text-[#30343F] mb-1">Enter OTP</label>
-              <input
-                type="text"
-                value={otp}
-                onChange={(e) => setOtp(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#248232]"
-                placeholder="6-digit OTP"
-                required
-              />
-              {error && <p className="text-red-600 text-sm mt-1">{error}</p>}
-            </div>
-            <button
-              type="submit"
-              className="w-full bg-[#248232] hover:bg-green-700 text-white py-2 rounded-lg"
-            >
-              Verify OTP
-            </button>
-          </form>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 to-slate-800 p-6">
+      <div className="bg-slate-800 p-8 rounded-2xl shadow-xl w-full max-w-md border border-slate-700">
+        <h2 className="text-3xl font-bold text-center text-white mb-6">Verify OTP</h2>
+
+        {error && (
+          <div className="bg-red-900/30 border border-red-800 text-red-200 px-4 py-3 rounded-lg mb-4 text-center">
+            {error}
+          </div>
         )}
+
+        <div className="space-y-4">
+          <div>
+            <label className="block text-slate-300 font-semibold mb-2">Enter OTP</label>
+            <input
+              type="text"
+              placeholder="Enter 6-digit OTP"
+              className="w-full p-3 bg-slate-900 border border-slate-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#248232] placeholder-slate-500"
+              value={otp}
+              onChange={(e) => setOtp(e.target.value)}
+            />
+          </div>
+
+          <button
+            onClick={handleVerify}
+            className="w-full bg-[#248232] text-white py-3 rounded-lg font-semibold hover:bg-green-600 transition duration-200 shadow-md hover:shadow-green-900/20"
+          >
+            Verify
+          </button>
+        </div>
       </div>
     </div>
   );
