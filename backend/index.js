@@ -19,7 +19,7 @@ app.use(cors({
 }));
 
 // Enable pre-flight requests for all routes
-app.options('*', cors());
+app.options(/.*/, cors());
 
 // DB Connection
 const uri = process.env.MONGO_URI
