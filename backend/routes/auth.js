@@ -16,8 +16,11 @@ module.exports = (db) => {
   const router = express.Router()
 
   // Setup nodemailer transporter
+  // Setup nodemailer transporter
   const transporter = nodemailer.createTransport({
-    service: "gmail",
+    host: "smtp.gmail.com",
+    port: 465,
+    secure: true, // use SSL
     auth: {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASS,
@@ -183,19 +186,19 @@ module.exports = (db) => {
     let { email } = req.body
     console.log("[FORGOT-PASSWORD] Step 1: Request received")
     console.log("[FORGOT-PASSWORD] Raw email from body:", email)
-    
+
     if (!email) {
       console.log("[FORGOT-PASSWORD] Error: No email provided")
       return res.status(400).json({ error: "Email is required" })
     }
-    
+
     email = email.trim().toLowerCase()
     console.log("[FORGOT-PASSWORD] Step 2: Email normalized:", email)
 
     try {
       console.log("[FORGOT-PASSWORD] Step 3: Querying database for user...")
       const user = await db.collection("users").findOne({ email })
-      
+
       if (!user) {
         // Don't reveal if user exists or not for security
         console.log("[FORGOT-PASSWORD] Step 4: User NOT found in database")
@@ -229,7 +232,7 @@ module.exports = (db) => {
       console.log("[FORGOT-PASSWORD] EMAIL_USER set:", !!process.env.EMAIL_USER)
       console.log("[FORGOT-PASSWORD] EMAIL_PASS set:", !!process.env.EMAIL_PASS)
       console.log("[FORGOT-PASSWORD] EMAIL_USER value:", process.env.EMAIL_USER)
-      
+
       if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
         console.error("[FORGOT-PASSWORD] ERROR: Email credentials not configured!")
         return res.status(500).json({ error: "Email service not configured. Please contact administrator." })
@@ -239,7 +242,7 @@ module.exports = (db) => {
       console.log("[FORGOT-PASSWORD] From:", process.env.EMAIL_USER)
       console.log("[FORGOT-PASSWORD] To:", email)
       console.log("[FORGOT-PASSWORD] Subject: VoteR - Password Reset Request")
-      
+
       try {
         console.log("[FORGOT-PASSWORD] Step 11: Calling transporter.sendMail()...")
         const info = await transporter.sendMail({
@@ -258,14 +261,14 @@ module.exports = (db) => {
           `,
           text: `You requested to reset your password for VoteR.\n\nClick this link to reset your password: ${resetUrl}\n\nThis link will expire in 1 hour.\n\nIf you didn't request this, please ignore this email.`,
         })
-        
+
         console.log("[FORGOT-PASSWORD] ========== EMAIL SENT SUCCESSFULLY ==========")
         console.log("[FORGOT-PASSWORD] Message ID:", info.messageId)
         console.log("[FORGOT-PASSWORD] Response:", info.response)
         console.log("[FORGOT-PASSWORD] Accepted:", info.accepted)
         console.log("[FORGOT-PASSWORD] Rejected:", info.rejected)
         console.log("[FORGOT-PASSWORD] =============================================")
-        
+
         res.json({ message: "If the email exists, a password reset link has been sent." })
       } catch (emailError) {
         console.error("[FORGOT-PASSWORD] ========== EMAIL SENDING FAILED ==========")
@@ -290,7 +293,7 @@ module.exports = (db) => {
       console.error("[FORGOT-PASSWORD] Error message:", err.message)
       console.error("[FORGOT-PASSWORD] Error stack:", err.stack)
       console.error("[FORGOT-PASSWORD] =============================================")
-      
+
       res.status(500).json({
         error: "Failed to process password reset request. Please try again later.",
         details: err.message
