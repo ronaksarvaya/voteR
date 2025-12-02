@@ -18,13 +18,14 @@ module.exports = (db) => {
   // Setup nodemailer transporter
   // Setup nodemailer transporter
   const transporter = nodemailer.createTransport({
-    service: "gmail",
+    host: "smtp.gmail.com",
+    port: 587,
+    secure: false, // use STARTTLS
     auth: {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASS,
     },
-    // Force IPv4 to avoid timeouts on some networks
-    family: 4,
+    family: 4, // Force IPv4
     debug: true, // Enable debug output
     logger: true, // Log to console
   })
