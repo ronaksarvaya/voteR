@@ -34,36 +34,13 @@ module.exports = (db) => {
             const frontendUrl = process.env.FRONTEND_URL || "https://vote-r.vercel.app";
             const resetUrl = `${frontendUrl}/reset-password/${resetToken}`;
 
-            try {
-                await sendEmail({
-                    to: email,
-                    subject: "VoteR - Password Reset Request",
-                    html: `
-            <h2>Password Reset Request</h2>
-            <p>You requested to reset your password for VoteR.</p>
-            <p>Click the link below to reset your password:</p>
-            <a href="${resetUrl}" style="display: inline-block; padding: 10px 20px; background-color: #248232; color: white; text-decoration: none; border-radius: 5px;">Reset Password</a>
-            <p>Or copy and paste this link in your browser:</p>
-            <p>${resetUrl}</p>
-            <p>This link will expire in 1 hour.</p>
-          `,
-                    text: `Reset your password: ${resetUrl}`,
-                });
-
-                res.json({
-                    message: "Password reset link generated.",
-                    resetLink: resetUrl,
-                    note: "Email sending is currently being bypassed/debugged. Please use the link below."
-                });
-            } catch (emailError) {
-                console.error("[FORGOT-PASSWORD] Email failed:", emailError);
-                // Return link even if email fails
-                return res.json({
-                    message: "Email failed to send, but here is your reset link:",
-                    resetLink: resetUrl,
-                    error: "Email service timeout"
-                });
-            }
+            // Email sending removed as per user request. 
+            // Returning link directly to the frontend.
+            res.json({
+                message: "Password reset link generated.",
+                resetLink: resetUrl,
+                note: "Please use the link below to reset your password."
+            });
         } catch (err) {
             console.error("Forgot password error:", err);
             res.status(500).json({ error: "Failed to process request" });

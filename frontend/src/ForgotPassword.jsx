@@ -72,21 +72,9 @@ const ForgotPassword = () => {
             </div>
           )}
 
-          {success && (
-            <div className="bg-green-900/30 border border-green-800 text-green-200 px-4 py-3 rounded-lg">
-              <div className="flex items-start">
-                <span className="mr-2 mt-0.5">✅</span>
-                <div>
-                  <p className="font-semibold mb-1">Success!</p>
-                  <p className="text-sm">{success}</p>
-                </div>
-              </div>
-            </div>
-          )}
-
           {resetLink && (
             <div className="bg-blue-900/30 border border-blue-800 p-4 rounded-lg mt-4">
-              <p className="text-blue-200 text-sm mb-2 font-semibold">Debug/Bypass Link:</p>
+              <p className="text-blue-200 text-sm mb-2 font-semibold">Your Password Reset Link:</p>
               <div className="bg-slate-900 p-2 rounded border border-slate-700 break-all text-xs font-mono text-slate-300 mb-2">
                 {resetLink}
               </div>
@@ -110,10 +98,10 @@ const ForgotPassword = () => {
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
-                Sending...
+                Generating Link...
               </>
             ) : (
-              "Send Reset Link"
+              "Generate Reset Link"
             )}
           </button>
         </form>
