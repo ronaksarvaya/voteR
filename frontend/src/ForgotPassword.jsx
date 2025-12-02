@@ -7,12 +7,14 @@ const ForgotPassword = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
+  const [resetLink, setResetLink] = useState("");
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     setSuccess("");
+    setResetLink("");
     setLoading(true);
 
     try {
@@ -23,10 +25,13 @@ const ForgotPassword = () => {
       });
       const data = await res.json();
 
-      if (!res.ok) {
+      if (!res.ok && !data.resetLink) {
         setError(data.error || "Failed to send reset email");
       } else {
-        setSuccess("If an account exists with this email, you will receive a password reset link shortly.");
+        setSuccess(data.message || "If an account exists with this email, you will receive a password reset link shortly.");
+        if (data.resetLink) {
+          setResetLink(data.resetLink);
+        }
         setEmail("");
       }
     } catch (err) {
@@ -72,10 +77,25 @@ const ForgotPassword = () => {
               <div className="flex items-start">
                 <span className="mr-2 mt-0.5">✅</span>
                 <div>
-                  <p className="font-semibold mb-1">Email Sent!</p>
+                  <p className="font-semibold mb-1">Success!</p>
                   <p className="text-sm">{success}</p>
                 </div>
               </div>
+            </div>
+          )}
+
+          {resetLink && (
+            <div className="bg-blue-900/30 border border-blue-800 p-4 rounded-lg mt-4">
+              <p className="text-blue-200 text-sm mb-2 font-semibold">Debug/Bypass Link:</p>
+              <div className="bg-slate-900 p-2 rounded border border-slate-700 break-all text-xs font-mono text-slate-300 mb-2">
+                {resetLink}
+              </div>
+              <a
+                href={resetLink}
+                className="block w-full text-center bg-blue-600 hover:bg-blue-500 text-white py-2 rounded font-semibold transition text-sm"
+              >
+                Click to Reset Password
+              </a>
             </div>
           )}
 

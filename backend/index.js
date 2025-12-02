@@ -33,15 +33,19 @@ async function connectToDB() {
   console.log("Connected to MongoDB");
 
   // Load Routes
+  // Load Routes
   const otpRoutes = require("./routes/otp")(db);
   const adminRoutes = require("./routes/admin")(db);
   const registerRoutes = require("./routes/register")(db);
   const authRoutes = require("./routes/auth")(db);
+  const passwordRoutes = require("./routes/password")(db);
   const sessionRoutes = require("./routes/session")(db);
+
   app.use("/otp", otpRoutes);
   app.use("/admin", adminRoutes);
   app.use("/register", registerRoutes);
   app.use("/auth", authRoutes);
+  app.use("/auth", passwordRoutes); // Mount password routes under /auth to keep existing API structure
   app.use("/session", sessionRoutes);
 }
 
