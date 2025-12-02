@@ -8,14 +8,18 @@ const app = express();
 app.use(express.json());
 app.use(cors({
   origin: [
-    "https://vote-r.vercel.app", // your frontend domain
-    "http://localhost:5173",      // local dev
-    "http://localhost:5174"       // alternative local port
+    "https://vote-r.vercel.app",
+    "http://localhost:5173",
+    "http://localhost:5174",
+    "https://voter-tx4v.onrender.com"
   ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'Origin']
+  allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'Accept']
 }));
+
+// Enable pre-flight requests for all routes
+app.options('*', cors());
 
 // DB Connection
 const uri = process.env.MONGO_URI
@@ -148,7 +152,7 @@ app.get("/user-details", (req, res) => {
 const PORT = process.env.PORT || 10000;
 connectToDB()
   .then(() => {
-    app.listen(PORT,'0.0.0.0', () => {
+    app.listen(PORT, '0.0.0.0', () => {
       console.log(`Server is running on port ${PORT}`);
     });
   })
