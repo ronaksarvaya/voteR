@@ -13,6 +13,7 @@ const SessionDashboard = () => {
   const [success, setSuccess] = useState("");
   const [isOwner, setIsOwner] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [isPublicResults, setIsPublicResults] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -33,6 +34,7 @@ const SessionDashboard = () => {
     if (res.ok) {
       const data = await res.json();
       setSession(data);
+      setIsPublicResults(!!data.publicResults);
       // Check if current user is owner
       const token = localStorage.getItem("token");
       if (token) {
@@ -55,12 +57,17 @@ const SessionDashboard = () => {
     if (!token) return;
 
     try {
-      const res = await fetch(`${API_URL}/session/${sessionId}/votes`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-      if (res.ok) setVotes(await res.json());
+      // If we don't have session yet, we can't check public results, but votes fetch might require auth if private
+      // However, fetchSession is parallel. Let's just try fetching.
+      // Ideally we wait for session to know if we need auth or if public is allowed.
+      // But the backend handles the logic: if public, it returns; if private and auth, it returns.
+
+      const headers = { Authorization: `Bearer ${token}` };
+      const res = await fetch(`${API_URL}/session/${sessionId}/votes`, { headers });
+
+      if (res.ok) {
+        setVotes(await res.json());
+      }
     } catch (error) {
       console.error("Error fetching votes:", error);
     }
@@ -89,6 +96,63 @@ const SessionDashboard = () => {
         setTimeout(() => setSuccess(""), 3000);
       }
     } catch { setError("Network error"); }
+  };
+
+  const handleDeleteCandidate = async (candidateId) => {
+    if (!window.confirm("Are you sure you want to delete this candidate?")) return;
+
+    const token = localStorage.getItem("token");
+    if (!token) return;
+
+    try {
+      const res = await fetch(`${API_URL}/session/${sessionId}/candidate/${candidateId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      if (res.ok) {
+        setSuccess("Candidate deleted successfully");
+        fetchCandidates();
+        fetchVotes(); // Re-fetch votes as they might change
+        setTimeout(() => setSuccess(""), 3000);
+      } else {
+        const data = await res.json();
+        setError(data.error || "Failed to delete candidate");
+      }
+    } catch (err) {
+      console.error("Error deleting candidate:", err);
+      setError("Network error");
+    }
+  };
+
+  const togglePublicResults = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+
+    try {
+      const newValue = !isPublicResults;
+      const res = await fetch(`${API_URL}/session/${sessionId}/settings/public`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ publicResults: newValue })
+      });
+
+      if (res.ok) {
+        setIsPublicResults(newValue);
+        setSuccess(newValue ? "Results are now public!" : "Results are now private.");
+        setTimeout(() => setSuccess(""), 3000);
+      } else {
+        setError("Failed to update settings");
+      }
+    } catch (err) {
+      console.error("Error toggling public results:", err);
+      setError("Network error");
+    }
   };
 
   const copyToClipboard = (text) => {
@@ -143,7 +207,7 @@ const SessionDashboard = () => {
           </div>
 
           {/* Session Link */}
-          <div className="bg-blue-900/20 border border-blue-800 rounded-lg p-4">
+          <div className="bg-blue-900/20 border border-blue-800 rounded-lg p-4 mb-6">
             <p className="text-sm font-semibold text-blue-300 mb-2">📤 Share this link with participants:</p>
             <div className="flex gap-2">
               <input
@@ -160,6 +224,21 @@ const SessionDashboard = () => {
               </button>
             </div>
             <p className="text-xs text-slate-500 mt-2">Session Code: <span className="font-mono font-bold text-slate-300">{sessionId}</span></p>
+          </div>
+
+          {/* Public Results Toggle */}
+          <div className="flex items-center gap-3 bg-slate-900 p-4 rounded-lg border border-slate-600">
+            <span className="text-slate-300 font-medium">Publicize User Results:</span>
+            <button
+              onClick={togglePublicResults}
+              className={`px-4 py-2 rounded-full font-bold transition duration-200 ${isPublicResults ? "bg-green-600 text-white" : "bg-gray-600 text-gray-300"
+                }`}
+            >
+              {isPublicResults ? "ON" : "OFF"}
+            </button>
+            <span className="text-xs text-slate-500 ml-2">
+              {isPublicResults ? "(Anyone with link can view)" : "(Only you can view)"}
+            </span>
           </div>
         </div>
 
@@ -245,16 +324,25 @@ const SessionDashboard = () => {
               <div className="space-y-3 max-h-96 overflow-y-auto pr-2 custom-scrollbar">
                 {candidates.map((c, index) => (
                   <div key={c._id} className="border border-slate-600 rounded-lg p-4 hover:bg-slate-700/50 transition duration-200">
-                    <div className="flex items-start gap-3">
-                      <div className="w-8 h-8 bg-[#248232] text-white rounded-full flex items-center justify-center font-bold flex-shrink-0">
-                        {index + 1}
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-start gap-3 flex-1">
+                        <div className="w-8 h-8 bg-[#248232] text-white rounded-full flex items-center justify-center font-bold flex-shrink-0">
+                          {index + 1}
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="font-bold text-white">{c.name}</h4>
+                          {c.manifesto && (
+                            <p className="text-sm text-slate-400 mt-1">{c.manifesto}</p>
+                          )}
+                        </div>
                       </div>
-                      <div className="flex-1">
-                        <h4 className="font-bold text-white">{c.name}</h4>
-                        {c.manifesto && (
-                          <p className="text-sm text-slate-400 mt-1">{c.manifesto}</p>
-                        )}
-                      </div>
+                      <button
+                        onClick={() => handleDeleteCandidate(c._id)}
+                        className="text-red-400 hover:text-red-300 hover:bg-red-900/30 p-2 rounded transition"
+                        title="Delete Candidate"
+                      >
+                        🗑️
+                      </button>
                     </div>
                   </div>
                 ))}

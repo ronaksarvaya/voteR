@@ -36,31 +36,17 @@ module.exports = (db) => {
         return res.status(409).json({ error: "Email already registered" });
       }
       const passwordHash = await bcrypt.hash(password, 10);
-      const otp = generateOTP();
 
-      // If skipVerification is true, mark user as verified immediately
       const user = {
         email,
         passwordHash,
-        verified: skipVerification === true,
-        otp: skipVerification ? undefined : otp,
-        otpCreatedAt: skipVerification ? undefined : new Date(),
+        verified: true, // Auto-verify
         createdAt: new Date(),
       };
 
       await db.collection("users").insertOne(user);
 
-      // Send OTP email only if verification is not skipped
-      if (!skipVerification) {
-        await sendEmail({
-          to: email,
-          subject: "Your VoteR Verification OTP",
-          text: `Your OTP for VoteR signup is: ${otp}\n\nThis OTP will expire in 10 minutes.`,
-        });
-        res.json({ message: "Signup successful. Please verify your email.", requiresVerification: true });
-      } else {
-        res.json({ message: "Signup successful. You can now log in.", requiresVerification: false });
-      }
+      res.json({ message: "Signup successful. You can now log in.", requiresVerification: false });
     } catch (err) {
       console.error("Signup error:", err);
       res.status(500).json({ error: "Signup failed" });

@@ -65,5 +65,90 @@ module.exports = (db) => {
     }
   });
 
+  // Delete student/candidate
+  router.delete("/student/:id", async (req, res) => {
+    const { id } = req.params;
+    try {
+      const result = await db.collection("students").deleteOne({ "ID no": parseInt(id) });
+      if (result.deletedCount === 0) {
+        return res.status(404).json({ error: "Student not found" });
+      }
+      res.json({ message: "Student deleted successfully" });
+    } catch (err) {
+      console.error("Error deleting student:", err);
+      res.status(500).json({ error: "Failed to delete student" });
+    }
+  });
+
+  // Settings: Get Public Results Flag
+  router.get("/settings/public-results", async (req, res) => {
+    try {
+      const settings = await db.collection("settings").findOne({ type: "global" });
+      res.json({ isPublic: settings ? !!settings.publicResults : false });
+    } catch (err) {
+      res.status(500).json({ error: "Failed to fetch settings" });
+    }
+  });
+
+  // Settings: Set Public Results Flag
+  router.post("/settings/public-results", async (req, res) => {
+    const { isPublic } = req.body;
+    try {
+      await db.collection("settings").updateOne(
+        { type: "global" },
+        { $set: { publicResults: !!isPublic } },
+        { upsert: true }
+      );
+      res.json({ message: "Settings updated", isPublic: !!isPublic });
+    } catch (err) {
+      res.status(500).json({ error: "Failed to update settings" });
+    }
+  });
+
+  // Public Results Endpoint
+  router.get("/public/results", async (req, res) => {
+    try {
+      // Check setting
+      const settings = await db.collection("settings").findOne({ type: "global" });
+      if (!settings || !settings.publicResults) {
+        return res.status(403).json({ error: "Results are not public yet." });
+      }
+
+      // Fetch aggregated votes
+      const votes = await db.collection("votes").find().toArray();
+      const candidates = await db.collection("students").find({ role: "candidate", approved: true }).toArray();
+
+      // Similar logic to Admin dashboard
+      const voteCount = {};
+      candidates.forEach(c => {
+        voteCount[c["ID no"]] = {
+          id: c["ID no"],
+          name: c["Full Name"],
+          manifesto: c.manifesto || "",
+          count: 0
+        };
+      });
+
+      votes.forEach(v => {
+        if (voteCount[v.candidateId]) {
+          voteCount[v.candidateId].count++;
+        }
+      });
+
+      const results = Object.values(voteCount)
+        .sort((a, b) => b.count - a.count)
+        .map(c => ({
+          name: c.name,
+          votes: c.count,
+          percentage: votes.length > 0 ? Math.round((c.count / votes.length) * 100) : 0
+        }));
+
+      res.json({ totalVotes: votes.length, results });
+    } catch (err) {
+      console.error("Error fetching public results:", err);
+      res.status(500).json({ error: "Failed to fetch results" });
+    }
+  });
+
   return router;
 };

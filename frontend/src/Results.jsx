@@ -20,49 +20,51 @@ const Results = () => {
     setLoading(true);
     const token = localStorage.getItem("token");
 
-    if (!token) {
-      navigate("/login");
-      return;
-    }
-
     try {
-      // First, verify if user is the owner
-      const verifyRes = await fetch(`${API_URL}/session/${sessionId}/verify-owner`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-
-      if (!verifyRes.ok) {
-        setAccessDenied(true);
-        setLoading(false);
-        return;
-      }
-
-      const verifyData = await verifyRes.json();
-
-      if (!verifyData.isOwner) {
-        setAccessDenied(true);
-        setLoading(false);
-        return;
-      }
-
-      setIsOwner(true);
-
-      // Fetch session details
+      // 1. Fetch Request to get session details including public status
       const sessionRes = await fetch(`${API_URL}/session/${sessionId}`);
-      if (sessionRes.ok) {
-        const sessionData = await sessionRes.json();
-        setSessionTitle(sessionData.title);
+      if (!sessionRes.ok) {
+        setAccessDenied(true);
+        setLoading(false);
+        return;
       }
 
-      // Fetch candidates and votes
-      const resC = await fetch(`${API_URL}/session/${sessionId}/candidates`);
-      const resV = await fetch(`${API_URL}/session/${sessionId}/votes`, {
-        headers: {
-          Authorization: `Bearer ${token}`
+      const sessionData = await sessionRes.json();
+      setSessionTitle(sessionData.title);
+
+      // 2. Check permissions
+      // If public, we allow access. If not public, we require token + ownership.
+      if (!sessionData.publicResults) {
+        if (!token) {
+          navigate("/login");
+          return;
         }
-      });
+
+        // Verify owner if not public
+        const verifyRes = await fetch(`${API_URL}/session/${sessionId}/verify-owner`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
+        if (!verifyRes.ok) {
+          setAccessDenied(true);
+          setLoading(false);
+          return;
+        }
+
+        const verifyData = await verifyRes.json();
+        if (!verifyData.isOwner) {
+          setAccessDenied(true);
+          setLoading(false);
+          return;
+        }
+        setIsOwner(true);
+      }
+
+      // 3. Fetch candidates and votes
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
+      const resC = await fetch(`${API_URL}/session/${sessionId}/candidates`);
+      const resV = await fetch(`${API_URL}/session/${sessionId}/votes`, { headers });
 
       if (resC.ok) setCandidates(await resC.json());
       if (resV.ok) {
@@ -71,6 +73,7 @@ const Results = () => {
         const errorData = await resV.json();
         console.error("Error fetching votes:", errorData.error);
       }
+
     } catch (error) {
       console.error("Error:", error);
       setAccessDenied(true);

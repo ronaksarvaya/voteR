@@ -13,6 +13,7 @@ const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState("students")
   const [voteStats, setVoteStats] = useState([])
   const [totalVotes, setTotalVotes] = useState(0)
+  const [isPublicResults, setIsPublicResults] = useState(false)
 
   // Protect /admin route
   useEffect(() => {
@@ -42,6 +43,13 @@ const AdminDashboard = () => {
       const resStudents = await fetch(`${API_URL}/admin/students`)
       const resVotes = await fetch(`${API_URL}/admin/votes`)
       const resPending = await fetch(`${API_URL}/admin/pending-candidates`)
+
+      // Fetch settings
+      const resSettings = await fetch(`${API_URL}/admin/settings/public-results`)
+      if (resSettings.ok) {
+        const dataSettings = await resSettings.json()
+        setIsPublicResults(dataSettings.isPublic)
+      }
 
       const dataStudents = await resStudents.json()
       const dataVotes = await resVotes.json()
@@ -107,6 +115,42 @@ const AdminDashboard = () => {
     }
   }
 
+  const togglePublicResults = async () => {
+    try {
+      const newValue = !isPublicResults
+      const res = await fetch(`${API_URL}/admin/settings/public-results`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isPublic: newValue }),
+      })
+      if (res.ok) {
+        setIsPublicResults(newValue)
+      }
+    } catch (err) {
+      console.error("Error toggling settings:", err)
+    }
+  }
+
+  const handleDelete = async (collegeId) => {
+    if (!window.confirm(`Are you sure you want to delete student ID ${collegeId}? This action cannot be undone.`)) {
+      return
+    }
+
+    try {
+      const res = await fetch(`${API_URL}/admin/student/${collegeId}`, {
+        method: "DELETE",
+      })
+
+      if (res.ok) {
+        fetchData() // Refresh data
+      } else {
+        alert("Failed to delete student")
+      }
+    } catch (err) {
+      console.error("Delete error:", err)
+    }
+  }
+
   const sortedStudents = [...students].sort((a, b) => {
     const aRegistered = !!a.registered
     const bRegistered = !!b.registered
@@ -149,6 +193,7 @@ const AdminDashboard = () => {
                   <th className="px-4 py-2">Name</th>
                   <th className="px-4 py-2">Status</th>
                   <th className="px-4 py-2">Role</th>
+                  <th className="px-4 py-2">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -158,6 +203,14 @@ const AdminDashboard = () => {
                     <td className="px-4 py-2">{student["Full Name"]}</td>
                     <td className="px-4 py-2">{student.registered ? "REGISTERED" : "NOT REGISTERED"}</td>
                     <td className="px-4 py-2">{student.role || "N/A"}</td>
+                    <td className="px-4 py-2">
+                      <button
+                        onClick={() => handleDelete(student["ID no"])}
+                        className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm transition"
+                      >
+                        Delete
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -222,12 +275,20 @@ const AdminDashboard = () => {
                       <p className="text-sm text-slate-400 mt-1">Manifesto: {candidate.manifesto}</p>
                     )}
                   </div>
-                  <button
-                    onClick={() => handleApprove(candidate["ID no"])}
-                    className="bg-[#248232] text-white px-4 py-1 rounded-lg hover:bg-green-600 transition duration-200"
-                  >
-                    Approve
-                  </button>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => handleApprove(candidate["ID no"])}
+                      className="bg-[#248232] text-white px-4 py-1 rounded-lg hover:bg-green-600 transition duration-200"
+                    >
+                      Approve
+                    </button>
+                    <button
+                      onClick={() => handleDelete(candidate["ID no"])}
+                      className="bg-red-600 text-white px-4 py-1 rounded-lg hover:bg-red-700 transition duration-200"
+                    >
+                      Reject
+                    </button>
+                  </div>
                 </li>
               ))}
             </ul>
@@ -239,6 +300,21 @@ const AdminDashboard = () => {
       {activeTab === "results" && (
         <div className="bg-slate-800 p-4 rounded-xl shadow-md border border-slate-700">
           <h2 className="text-xl font-semibold mb-4 text-white">Election Results</h2>
+
+          <div className="flex items-center gap-3 mb-6 bg-slate-900 p-4 rounded-lg border border-slate-600">
+            <span className="text-slate-300 font-medium">Publicize Results to Users:</span>
+            <button
+              onClick={togglePublicResults}
+              className={`px-4 py-2 rounded-full font-bold transition duration-200 ${isPublicResults ? "bg-green-600 text-white" : "bg-gray-600 text-gray-300"
+                }`}
+            >
+              {isPublicResults ? "ON" : "OFF"}
+            </button>
+            <span className="text-xs text-slate-500 ml-2">
+              {isPublicResults ? "(Users can view results)" : "(Results hidden from users)"}
+            </span>
+          </div>
+
           <p className="mb-4 text-slate-300">
             Total votes cast: <span className="font-bold text-white">{totalVotes}</span>
           </p>

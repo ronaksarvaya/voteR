@@ -13,7 +13,7 @@ const Signup = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [skipVerification, setSkipVerification] = useState(false);
+  // const [skipVerification, setSkipVerification] = useState(false); // Removed skipVerification
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -46,19 +46,17 @@ const Signup = () => {
       const res = await fetch(`${API_URL}/auth/signup`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, skipVerification })
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password })
       });
       const data = await res.json();
       if (!res.ok) {
         toast.error(data.error || "Signup failed");
       } else {
-        if (data.requiresVerification) {
-          toast.success("Signup successful! Please verify your email.");
-          setTimeout(() => navigate("/verify-signup", { state: { email } }), 1500);
-        } else {
-          toast.success("Signup successful! You can now log in.");
-          setTimeout(() => navigate("/login"), 1500);
-        }
+        // Always redirect to login now
+        toast.success("Signup successful! You can now log in.");
+        setTimeout(() => navigate("/login"), 1500);
       }
     } catch (err) {
       toast.error("Network error. Please try again.");
@@ -142,16 +140,7 @@ const Signup = () => {
               </div>
             </div>
 
-            <div className="flex items-center space-x-2 bg-muted/50 p-3 rounded-lg border border-border">
-              <Checkbox
-                id="skipVerification"
-                checked={skipVerification}
-                onCheckedChange={setSkipVerification}
-              />
-              <Label htmlFor="skipVerification" className="text-sm text-muted-foreground cursor-pointer font-normal">
-                Skip email verification (for testing)
-              </Label>
-            </div>
+            {/* Verification checkbox removed */}
 
             <Button
               className="w-full font-semibold shadow-lg"

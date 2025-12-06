@@ -76,6 +76,7 @@ module.exports = (db) => {
       code: session.code,
       ownerId: session.ownerId,
       createdAt: session.createdAt,
+      publicResults: !!session.publicResults,
     });
   });
 
@@ -95,6 +96,39 @@ module.exports = (db) => {
     };
     await db.collection("candidates").insertOne(candidate);
     res.json({ message: "Candidate added" });
+  });
+
+  // Delete candidate (admin only)
+  router.delete("/:code/candidate/:candidateId", authMiddleware, async (req, res) => {
+    const { code, candidateId } = req.params;
+    const session = await db.collection("sessions").findOne({ code });
+
+    if (!session) return res.status(404).json({ error: "Session not found" });
+    if (session.ownerId.toString() !== req.user.userId) {
+      return res.status(403).json({ error: "Only session owner can delete candidates" });
+    }
+
+    try {
+      const result = await db.collection("candidates").deleteOne({
+        _id: new ObjectId(candidateId),
+        sessionCode: code
+      });
+
+      if (result.deletedCount === 0) {
+        return res.status(404).json({ error: "Candidate not found" });
+      }
+
+      // Also delete associated votes? Optional but cleaner.
+      await db.collection("votes").deleteMany({
+        sessionCode: code,
+        candidateId: candidateId
+      });
+
+      res.json({ message: "Candidate deleted successfully" });
+    } catch (err) {
+      console.error("Error deleting candidate:", err);
+      res.status(500).json({ error: "Failed to delete candidate" });
+    }
   });
 
   // List candidates
@@ -134,19 +168,55 @@ module.exports = (db) => {
     res.json({ isOwner });
   });
 
-  // List votes (for results) - Only owner can access
-  router.get("/:code/votes", authMiddleware, async (req, res) => {
+  // Toggle Public Results for Session
+  router.put("/:code/settings/public", authMiddleware, async (req, res) => {
+    const { code } = req.params;
+    const { publicResults } = req.body;
+
+    const session = await db.collection("sessions").findOne({ code });
+    if (!session) return res.status(404).json({ error: "Session not found" });
+    if (session.ownerId.toString() !== req.user.userId) {
+      return res.status(403).json({ error: "Only session owner can change settings" });
+    }
+
+    try {
+      await db.collection("sessions").updateOne(
+        { code },
+        { $set: { publicResults: !!publicResults } }
+      );
+      res.json({ message: "Settings updated", publicResults: !!publicResults });
+    } catch (err) {
+      console.error("Error updating settings:", err);
+      res.status(500).json({ error: "Failed to update settings" });
+    }
+  });
+
+  // List votes (for results) - Session Owner OR if Public
+  router.get("/:code/votes", async (req, res) => {
     const { code } = req.params;
     const session = await db.collection("sessions").findOne({ code });
     if (!session) return res.status(404).json({ error: "Session not found" });
 
-    // Check if user is the session owner
-    if (session.ownerId.toString() !== req.user.userId) {
-      return res.status(403).json({ error: "Only session owner can view results" });
+    // Check auth if private
+    if (!session.publicResults) {
+      authMiddleware(req, res, async () => {
+        if (session.ownerId.toString() !== req.user.userId) {
+          return res.status(403).json({ error: "Only session owner can view results" });
+        }
+        respondWithVotes();
+      });
+    } else {
+      respondWithVotes();
     }
 
-    const votes = await db.collection("votes").find({ sessionCode: code }).toArray();
-    res.json(votes);
+    async function respondWithVotes() {
+      try {
+        const votes = await db.collection("votes").find({ sessionCode: code }).toArray();
+        res.json(votes);
+      } catch (err) {
+        res.status(500).json({ error: "Failed to fetch votes" });
+      }
+    }
   });
 
   // Delete session - Only owner can delete

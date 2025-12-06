@@ -16,6 +16,7 @@ const User = () => {
   const [candidates, setCandidates] = useState([])
   const [votingStatus, setVotingStatus] = useState({ hasVoted: false, message: "" })
   const [selectedCandidate, setSelectedCandidate] = useState(null)
+  const [publicResults, setPublicResults] = useState(null)
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -51,13 +52,11 @@ const User = () => {
         setApproved(regData.approved || false)
 
         if (regData.registered === true) {
-          // Check if user has already voted
           const votesRes = await fetch(`${API_URL}/admin/votes`)
           const votes = await votesRes.json()
           const hasVoted = votes.some((vote) => vote.voterId === Number.parseInt(idNo))
           setVotingStatus({ hasVoted, message: hasVoted ? "You have already voted." : "" })
 
-          // Fetch candidates regardless of role to display them
           const candidateRes = await fetch(`${API_URL}/candidates`)
           const candidateList = await candidateRes.json()
           setCandidates(candidateList)
@@ -71,7 +70,20 @@ const User = () => {
       }
     }
 
+    const fetchPublicResults = async () => {
+      try {
+        const res = await fetch(`${API_URL}/admin/public/results`)
+        if (res.ok) {
+          const data = await res.json()
+          setPublicResults(data)
+        }
+      } catch (err) {
+        console.error("Error fetching public results:", err)
+      }
+    }
+
     fetchUserDetails()
+    fetchPublicResults()
   }, [navigate])
 
   const handleLogout = () => {
@@ -105,7 +117,6 @@ const User = () => {
         setRoleToRegister(null)
         setManifesto("")
 
-        // Fetch candidates after registration
         const candidateRes = await fetch(`${API_URL}/candidates`)
         const candidateList = await candidateRes.json()
         setCandidates(candidateList)
@@ -320,6 +331,38 @@ const User = () => {
             </div>
           )}
         </>
+      )}
+
+      {/* Public Results Section */}
+      {publicResults && (
+        <div className="mt-12 bg-slate-800 p-6 rounded-2xl shadow-xl border border-slate-700 max-w-4xl mx-auto">
+          <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
+            <span>📊</span> Live Election Results
+          </h2>
+          <p className="mb-6 text-slate-300">
+            Total votes cast: <span className="font-bold text-white">{publicResults.totalVotes}</span>
+          </p>
+
+          <div className="space-y-4">
+            {publicResults.results.map((c, i) => (
+              <div key={i} className="border border-slate-600 rounded-xl p-4 bg-slate-900/50">
+                <div className="flex justify-between items-center mb-2">
+                  <div className="flex items-center gap-2">
+                    {i === 0 && c.votes > 0 && <span className="text-xl">👑</span>}
+                    <h3 className="text-lg font-bold text-white">{c.name}</h3>
+                  </div>
+                  <span className="font-bold text-[#248232]">{c.votes} votes ({c.percentage}%)</span>
+                </div>
+                <div className="w-full bg-slate-700 rounded-full h-3">
+                  <div
+                    className="bg-gradient-to-r from-green-500 to-green-600 h-3 rounded-full transition-all duration-500"
+                    style={{ width: `${c.percentage}%` }}
+                  ></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       )}
 
       {registrationMessage && <p className="text-green-400 font-medium mt-6 text-center">{registrationMessage}</p>}
